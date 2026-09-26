@@ -3,7 +3,7 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & Modern Light Theme
+# 1. Page Configuration & Patterned Editorial Styling
 st.set_page_config(
     page_title="PlainSight",
     page_icon="👁️",
@@ -12,9 +12,11 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Clean, bright background with high readability */
+    /* Sleek background with a subtle dot-grid pattern */
     .stApp {
-        background-color: #F4F6F8;
+        background-color: #F8F9FA;
+        background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+        background-size: 24px 24px;
         color: #1E2229;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -23,7 +25,7 @@ st.markdown("""
         font-weight: 600;
         letter-spacing: -0.5px;
     }
-    /* Sleek accent button */
+    /* Royal blue accent button */
     .stButton > button {
         background-color: #2563EB !important;
         color: #FFFFFF !important;
@@ -36,13 +38,13 @@ st.markdown("""
     .stButton > button:hover {
         background-color: #1D4ED8 !important;
     }
-    /* Crisp clean cards/uploaders */
+    /* Solid clean cards to pop over the pattern */
     div[data-testid="stFileUploader"] {
         background-color: #FFFFFF;
         border: 1px solid #E2E8F0;
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     </style>
 """, unsafe_allow_html=True)
