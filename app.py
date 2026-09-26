@@ -14,7 +14,7 @@ st.markdown("""
     <style>
     /* Grounded, natural stone and sand tones */
     .stApp {
-        background-color: #F5F4F0;
+        background-color: #F3ECE4;
         color: #2F3530;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
