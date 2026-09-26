@@ -45,8 +45,8 @@ st.markdown("""
 
 # 2. App Header
 st.title("PlainSight")
-st.markdown("*Absolute clarity. Zero flattery.*")
-st.write("Upload a photo of an outfit to receive an unvarnished breakdown and professional style fix.")
+st.markdown("*Honest style guidance. Zero pretense.*")
+st.write("Upload a photo of an outfit to receive a balanced, discerning review and supportive style advice.")
 
 st.markdown("---")
 
@@ -71,22 +71,22 @@ if uploaded_file is not None:
                             continue
                         raise err
 
-            # Expert Style Review & Blueprint
-            with st.spinner("Analyzing structural mechanics, facial contrast, and tones..."):
+            # Balanced Fashion Mentor Review
+            with st.spinner("Analyzing the look, vibe, and proportions..."):
                 try:
                     prompt = """
-                    You are PlainSight, an objective, highly observant, and straight-talking style analyst. 
-                    You do not flatter people falsely. Your job is to strip away polite illusions and tell the unvarnished truth about how this outfit works.
+                    You are PlainSight, an expert, sophisticated, and discerning fashion stylist. 
+                    Your philosophy is simple: celebrate great style warmly when it is earned, be completely honest when an outfit fails, but always offer guidance with empathy, kindness, and respect. Never make cynical assumptions (like calling fresh streetwear or modern youth style "hand-me-downs").
                     
-                    Analyze the image based on these strict guidelines:
-                    1. Facial Harmony & Undertones: Evaluate facial features and skin undertones.
-                    2. Mechanics & Proportions: Review color harmony, silhouette, scale, and cuts.
-                    3. Practical Fix: Provide a concrete, actionable correction tailored precisely to this subject.
+                    Analyze the image based on these guidelines:
+                    1. The Vibe & Strengths: Highlight what works. If the outfit has a cool energy, intentional proportions, or modern flair, give it genuine, well-deserved compliments.
+                    2. The Honest Assessment: Evaluate silhouette, color coordination, and fit with fairness and clarity.
+                    3. The Guidance: If the look is stellar, explain how to accessorize it further. If it needs help, offer gentle, constructive, and practical adjustments.
                     
                     Format your response precisely into these three sections using clear bold headings:
-                    - **The Verdict**
-                    - **The Reality Check**
-                    - **The Fix**
+                    - **The Vibe & Highlights**
+                    - **The Honest Breakdown**
+                    - **Style Suggestions**
                     """
                     
                     response = generate_with_retry('gemini-3.8-flash', [image, prompt])
@@ -95,10 +95,10 @@ if uploaded_file is not None:
                     st.markdown("### PlainSight Review")
                     st.write(response.text)
                     
-                    st.success("Analysis complete! Your unvarnished style report and step-by-step fix blueprint are ready above.")
+                    st.success("Style analysis complete!")
                             
                 except Exception as e:
                     st.error(f"The server is experiencing high demand right now. Please wait a moment and click 'Reveal The Truth' again. Details: {e}")
                     
         else:
-            st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
+            st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")             
