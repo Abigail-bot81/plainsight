@@ -1,5 +1,6 @@
 import streamlit as st
 from google import genai
+from google.genai.types import GenerateContentConfig, Modality
 from PIL import Image
 from io import BytesIO
 
@@ -101,12 +102,15 @@ if uploaded_file is not None:
                         "and update the trousers to well-fitted, dark-toned structured pants to fix the proportions while keeping the background intact."
                     )
                     
+                    # Requesting image generation output explicitly using the preview endpoint configuration
                     img_result = client.models.generate_content(
-                        model='gemini-3.8-flash',
-                        contents=[image, edit_prompt]
+                        model='gemini-3.1-flash-image-preview',
+                        contents=[image, edit_prompt],
+                        config=GenerateContentConfig(
+                            response_modalities=[Modality.TEXT, Modality.IMAGE]
+                        )
                     )
                     
-                    # Check if the response contains image parts
                     has_image = False
                     if img_result.candidates and img_result.candidates[0].content.parts:
                         for part in img_result.candidates[0].content.parts:
@@ -117,7 +121,7 @@ if uploaded_file is not None:
                                 break
                     
                     if not has_image:
-                        st.info("The model focused on text breakdown. To render visual image outputs seamlessly, ensure your model configuration targets the image-generation channel.")
+                        st.info("The model provided text adjustments. Please check your prompt configuration.")
                         
                 except Exception as img_err:
                     st.error(f"Could not render corrected image: {img_err}")
