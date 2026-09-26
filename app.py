@@ -72,7 +72,7 @@ if uploaded_file is not None:
                             return client.models.generate_content(model=model_name, contents=contents)
                     except Exception as err:
                         if "503" in str(err) and attempt < max_retries - 1:
-                            time.sleep(2 * (attempt + 1))  # Wait before retrying
+                            time.sleep(3 * (attempt + 1))  # Exponential backoff
                             continue
                         raise err
 
@@ -101,7 +101,7 @@ if uploaded_file is not None:
                     st.write(response.text)
                             
                 except Exception as e:
-                    st.error(f"Server is busy. Please try clicking 'Reveal the Truth' again in a moment. Details: {e}")
+                    st.error(f"The server is experiencing high demand right now (503 error). Please wait about 30 seconds and click 'Reveal The Truth' again. Details: {e}")
 
             # Step 2: Visual Correction Generation
             st.markdown("---")
@@ -114,7 +114,7 @@ if uploaded_file is not None:
                         "and update the trousers to well-fitted, dark-toned structured pants to fix the proportions while keeping the background intact."
                     )
                     
-                    img_result = generate_with_nested_retry = generate_with_retry(
+                    img_result = generate_with_retry(
                         'gemini-3.1-flash-image-preview', 
                         [image, edit_prompt], 
                         config=GenerateContentConfig(response_modalities=[Modality.TEXT, Modality.IMAGE])
@@ -133,7 +133,7 @@ if uploaded_file is not None:
                         st.info("The style analysis text roadmap is complete.")
                         
                 except Exception as img_err:
-                    st.warning("Visual generation model is resting due to temporary server traffic. Your expert text breakdown above outlines the exact styling changes!")
+                    st.warning("Visual generation is currently resting due to server capacity limits. Your expert style breakdown above gives you the exact blueprint!")
                     
         else:
             st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
