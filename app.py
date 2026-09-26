@@ -1,9 +1,7 @@
-import streamlit as st
+    import streamlit as st
 import time
 from google import genai
-from google.genai.types import GenerateContentConfig, Modality
 from PIL import Image
-from io import BytesIO
 
 # 1. Page Configuration & Brand Aesthetic Styling
 st.set_page_config(
@@ -62,21 +60,18 @@ if uploaded_file is not None:
         if "GEMINI_API_KEY" in st.secrets:
             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
             
-            # Helper function with automatic retry for 503 traffic spikes
-            def generate_with_retry(model_name, contents, config=None, max_retries=3):
+            # Helper function with automatic retry for traffic spikes
+            def generate_with_retry(model_name, contents, max_retries=3):
                 for attempt in range(max_retries):
                     try:
-                        if config:
-                            return client.models.generate_content(model=model_name, contents=contents, config=config)
-                        else:
-                            return client.models.generate_content(model=model_name, contents=contents)
+                        return client.models.generate_content(model=model_name, contents=contents)
                     except Exception as err:
                         if "503" in str(err) and attempt < max_retries - 1:
-                            time.sleep(3 * (attempt + 1))  # Exponential backoff
+                            time.sleep(2 * (attempt + 1))
                             continue
                         raise err
 
-            # Step 1: Expert Text Review
+            # Expert Style Review & Blueprint
             with st.spinner("Analyzing structural mechanics, facial contrast, and tones..."):
                 try:
                     prompt = """
@@ -99,41 +94,11 @@ if uploaded_file is not None:
                     st.markdown("---")
                     st.markdown("### PlainSight Review")
                     st.write(response.text)
+                    
+                    st.success("Analysis complete! Your unvarnished style report and step-by-step fix blueprint are ready above.")
                             
                 except Exception as e:
-                    st.error(f"The server is experiencing high demand right now (503 error). Please wait about 30 seconds and click 'Reveal The Truth' again. Details: {e}")
-
-            # Step 2: Visual Correction Generation
-            st.markdown("---")
-            st.markdown("### Suggested Style Correction (Same Subject)")
-            with st.spinner("Generating corrected outfit keeping the same person and likeness..."):
-                try:
-                    edit_prompt = (
-                        "Generate a revised version of this exact photo. Keep the same person's face, skin tone, hair, and likeness completely identical. "
-                        "Modify their clothing based on professional style advice: tuck the shirt in cleanly, add a defined waist, "
-                        "and update the trousers to well-fitted, dark-toned structured pants to fix the proportions while keeping the background intact."
-                    )
-                    
-                    img_result = generate_with_retry(
-                        'gemini-3.1-flash-image-preview', 
-                        [image, edit_prompt], 
-                        config=GenerateContentConfig(response_modalities=[Modality.TEXT, Modality.IMAGE])
-                    )
-                    
-                    has_image = False
-                    if img_result.candidates and img_result.candidates[0].content.parts:
-                        for part in img_result.candidates[0].content.parts:
-                            if part.inline_data:
-                                corrected_img = Image.open(BytesIO(part.inline_data.data))
-                                st.image(corrected_img, caption="PlainSight Corrected Look (Same Person)", use_container_width=True)
-                                has_image = True
-                                break
-                    
-                    if not has_image:
-                        st.info("The style analysis text roadmap is complete.")
-                        
-                except Exception as img_err:
-                    st.warning("Visual generation is currently resting due to server capacity limits. Your expert style breakdown above gives you the exact blueprint!")
+                    st.error(f"The server is experiencing high demand right now. Please wait a moment and click 'Reveal The Truth' again. Details: {e}")
                     
         else:
             st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
