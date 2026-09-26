@@ -3,7 +3,7 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & Architectural Micro-Line Styling
+# 1. Page Configuration & Tactile Linen Styling
 st.set_page_config(
     page_title="PlainSight",
     page_icon="👁️",
@@ -12,18 +12,18 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Architectural micro-line blueprint grid */
+    /* High-end tactile linen/canvas fabric texture */
     .stApp {
-        background-color: #F8F9FA;
+        background-color: #F7F5F0;
         background-image: 
-            linear-gradient(to right, #E2E8F0 1px, transparent 1px),
-            linear-gradient(to bottom, #E2E8F0 1px, transparent 1px);
-        background-size: 32px 32px;
-        color: #1E2229;
+            linear-gradient(90deg, rgba(214, 208, 196, 0.15) 1px, transparent 1px),
+            linear-gradient(0deg, rgba(214, 208, 196, 0.15) 1px, transparent 1px);
+        background-size: 4px 4px;
+        color: #262A28;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     h1, h2, h3 {
-        color: #111827;
+        color: #1A1E1C;
         font-weight: 600;
         letter-spacing: -0.5px;
     }
@@ -40,13 +40,13 @@ st.markdown("""
     .stButton > button:hover {
         background-color: #1D4ED8 !important;
     }
-    /* Crisp solid cards to layer over the blueprint lines */
+    /* Crisp clean cards to layer over the fabric texture */
     div[data-testid="stFileUploader"] {
         background-color: #FFFFFF;
-        border: 1px solid #CBD5E1;
+        border: 1px solid #DCD6CD;
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     </style>
 """, unsafe_allow_html=True)
