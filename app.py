@@ -45,7 +45,7 @@ st.markdown("""
 # 2. App Header
 st.title("PlainSight")
 st.markdown("*Absolute clarity. Zero flattery.*")
-st.write("Upload a photo of an outfit to receive an unvarnished, expert breakdown of facial harmony, color pairing, and proportions.")
+st.write("Upload a photo of an outfit to receive an unvarnished, expert breakdown and a visual correction.")
 
 st.markdown("---")
 
@@ -86,6 +86,31 @@ if uploaded_file is not None:
                     st.markdown("### PlainSight Review")
                     st.write(response.text)
                     
+                    # Generate a corrected visualization based on the fix
+                    st.markdown("---")
+                    st.markdown("### Suggested Style Correction")
+                    with st.spinner("Generating corrected outfit visualization..."):
+                        # Ask Gemini to create an image generation prompt based on the fix
+                        vis_prompt_res = client.models.generate_content(
+                            model='gemini-3.8-flash',
+                            contents=[response.text, "Based on the 'The Fix' section above, write a detailed visual prompt for an image generator showing the person wearing the corrected, perfectly proportioned version of this outfit with proper colors, tucking, and grounding."]
+                        )
+                        
+                        # Generate the image using Imagen
+                        result = client.models.generate_images(
+                            model='imagen-3.0-generate-002',
+                            prompt=vis_prompt_res.text,
+                            config=dict(
+                                number_of_images=1,
+                                output_mime_type="image/jpeg",
+                                aspect_ratio="3:4"
+                            )
+                        )
+                        
+                        for generated_image in result.generated_images:
+                            corrected_img = Image.open(BytesIO(generated_image.image.image_bytes))
+                            st.image(corrected_img, caption="PlainSight Corrected Look", use_container_width=True)
+                            
                 except Exception as e:
                     st.error(f"An error occurred during analysis: {e}")
         else:
