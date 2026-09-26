@@ -78,7 +78,7 @@ if uploaded_file is not None:
                     
                     # Using the correct active model identifier
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model='gemini-3.8-flash',
                         contents=[image, prompt]
                     )
                     
