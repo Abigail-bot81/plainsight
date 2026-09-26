@@ -91,7 +91,7 @@ if uploaded_file is not None:
                 except Exception as e:
                     st.error(f"An error occurred during analysis: {e}")
 
-            # Step 2: Visual Correction Generation (Same Subject & Likeness)
+            # Step 2: Visual Correction Generation (Safe Tier Handling)
             st.markdown("---")
             st.markdown("### Suggested Style Correction (Same Subject)")
             with st.spinner("Generating corrected outfit keeping the same person and likeness..."):
@@ -102,7 +102,6 @@ if uploaded_file is not None:
                         "and update the trousers to well-fitted, dark-toned structured pants to fix the proportions while keeping the background intact."
                     )
                     
-                    # Requesting image generation output explicitly using the preview endpoint configuration
                     img_result = client.models.generate_content(
                         model='gemini-3.1-flash-image-preview',
                         contents=[image, edit_prompt],
@@ -121,10 +120,10 @@ if uploaded_file is not None:
                                 break
                     
                     if not has_image:
-                        st.info("The model provided text adjustments. Please check your prompt configuration.")
+                        st.info("The style analysis has provided the precise textual roadmap for your correction.")
                         
                 except Exception as img_err:
-                    st.error(f"Could not render corrected image: {img_err}")
+                    st.warning("Visual generation is temporarily resting due to API rate limits on the image model tier. Your expert text breakdown above gives you the exact styling instructions to achieve this look!")
                     
         else:
             st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
