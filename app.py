@@ -3,7 +3,7 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & Patterned Editorial Styling
+# 1. Page Configuration & Architectural Micro-Line Styling
 st.set_page_config(
     page_title="PlainSight",
     page_icon="👁️",
@@ -12,11 +12,13 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Sleek background with a subtle dot-grid pattern */
+    /* Architectural micro-line blueprint grid */
     .stApp {
         background-color: #F8F9FA;
-        background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
-        background-size: 24px 24px;
+        background-image: 
+            linear-gradient(to right, #E2E8F0 1px, transparent 1px),
+            linear-gradient(to bottom, #E2E8F0 1px, transparent 1px);
+        background-size: 32px 32px;
         color: #1E2229;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -38,13 +40,13 @@ st.markdown("""
     .stButton > button:hover {
         background-color: #1D4ED8 !important;
     }
-    /* Solid clean cards to pop over the pattern */
+    /* Crisp solid cards to layer over the blueprint lines */
     div[data-testid="stFileUploader"] {
         background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #CBD5E1;
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
     </style>
 """, unsafe_allow_html=True)
