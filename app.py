@@ -101,4 +101,4 @@ if uploaded_file is not None:
                     st.error(f"The server is experiencing high demand right now. Please wait a moment and click 'Reveal The Truth' again. Details: {e}")
                     
         else:
-            st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")             
+            st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
