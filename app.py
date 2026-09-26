@@ -3,7 +3,7 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & Tactile Linen Styling
+# 1. Page Configuration & Soft Wavy Blue Styling
 st.set_page_config(
     page_title="PlainSight",
     page_icon="👁️",
@@ -12,18 +12,15 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* High-end tactile linen/canvas fabric texture */
+    /* Soft organic wavy gradient with gentle blue tones */
     .stApp {
-        background-color: #F7F5F0;
-        background-image: 
-            linear-gradient(90deg, rgba(214, 208, 196, 0.15) 1px, transparent 1px),
-            linear-gradient(0deg, rgba(214, 208, 196, 0.15) 1px, transparent 1px);
-        background-size: 4px 4px;
-        color: #262A28;
+        background: linear-gradient(135deg, #EBF1F5 0%, #D8E3ED 50%, #E6EDF5 100%);
+        background-attachment: fixed;
+        color: #1E252B;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     h1, h2, h3 {
-        color: #1A1E1C;
+        color: #12181E;
         font-weight: 600;
         letter-spacing: -0.5px;
     }
@@ -40,13 +37,14 @@ st.markdown("""
     .stButton > button:hover {
         background-color: #1D4ED8 !important;
     }
-    /* Crisp clean cards to layer over the fabric texture */
+    /* Crisp clean cards to layer over the soft background */
     div[data-testid="stFileUploader"] {
-        background-color: #FFFFFF;
-        border: 1px solid #DCD6CD;
+        background-color: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(203, 213, 225, 0.8);
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
     }
     </style>
 """, unsafe_allow_html=True)
