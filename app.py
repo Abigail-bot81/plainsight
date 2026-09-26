@@ -3,7 +3,7 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & High-End Editorial Styling
+# 1. Page Configuration & Modern Light Theme
 st.set_page_config(
     page_title="PlainSight",
     page_icon="👁️",
@@ -12,39 +12,37 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Sleek, high-contrast dark editorial theme */
+    /* Clean, bright background with high readability */
     .stApp {
-        background-color: #121212;
-        color: #E6E6E6;
+        background-color: #F4F6F8;
+        color: #1E2229;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     h1, h2, h3 {
-        color: #FFFFFF;
+        color: #111827;
         font-weight: 600;
         letter-spacing: -0.5px;
     }
-    /* Bold accent button */
+    /* Sleek accent button */
     .stButton > button {
-        background-color: #E6E6E6 !important;
-        color: #121212 !important;
+        background-color: #2563EB !important;
+        color: #FFFFFF !important;
         border: none !important;
         padding: 0.6rem 1.4rem;
         font-weight: 500;
-        border-radius: 4px;
+        border-radius: 6px;
         transition: background-color 0.2s ease;
     }
     .stButton > button:hover {
-        background-color: #FFFFFF !important;
+        background-color: #1D4ED8 !important;
     }
-    /* Deep charcoal containers */
+    /* Crisp clean cards/uploaders */
     div[data-testid="stFileUploader"] {
-        background-color: #1A1A1A;
-        border: 1px solid #333333;
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0;
         padding: 1.5rem;
-        border-radius: 6px;
-    }
-    div.stMarkdown {
-        color: #CCCCCC;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     </style>
 """, unsafe_allow_html=True)
