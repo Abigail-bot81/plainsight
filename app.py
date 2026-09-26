@@ -3,45 +3,48 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & Natural Aesthetic Styling
+# 1. Page Configuration & High-End Editorial Styling
 st.set_page_config(
     page_title="PlainSight",
-    page_icon="🌿",
+    page_icon="👁️",
     layout="wide"
 )
 
 st.markdown("""
     <style>
-    /* Grounded, natural stone and sand tones */
+    /* Sleek, high-contrast dark editorial theme */
     .stApp {
-        background-color: #F3ECE4;
-        color: #2F3530;
+        background-color: #121212;
+        color: #E6E6E6;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     h1, h2, h3 {
-        color: #384039;
-        font-weight: 500;
-        letter-spacing: -0.4px;
+        color: #FFFFFF;
+        font-weight: 600;
+        letter-spacing: -0.5px;
     }
-    /* Muted forest button */
+    /* Bold accent button */
     .stButton > button {
-        background-color: #798678 !important;
-        color: #FFFFFF !important;
+        background-color: #E6E6E6 !important;
+        color: #121212 !important;
         border: none !important;
         padding: 0.6rem 1.4rem;
-        font-weight: 400;
-        border-radius: 6px;
-        transition: background-color 0.3s ease;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
     }
     .stButton > button:hover {
-        background-color: #637062 !important;
+        background-color: #FFFFFF !important;
     }
-    /* Soft stone container */
+    /* Deep charcoal containers */
     div[data-testid="stFileUploader"] {
-        background-color: #FAF9F6;
-        border: 1px solid #D9D5CD;
+        background-color: #1A1A1A;
+        border: 1px solid #333333;
         padding: 1.5rem;
-        border-radius: 8px;
+        border-radius: 6px;
+    }
+    div.stMarkdown {
+        color: #CCCCCC;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -53,7 +56,7 @@ st.write("Upload an outfit photograph to receive a structured breakdown and thou
 
 st.markdown("---")
 
-# Create side-by-side columns (Left: Upload/Image, Right: Analysis)
+# Side-by-side columns (Left: Upload/Image, Right: Analysis)
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
