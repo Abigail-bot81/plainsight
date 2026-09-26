@@ -1,6 +1,7 @@
 import streamlit as st
 from google import genai
 from PIL import Image
+from io import BytesIO
 
 # 1. Page Configuration & Brand Aesthetic Styling
 st.set_page_config(
@@ -78,7 +79,7 @@ if uploaded_file is not None:
                     """
                     
                     response = client.models.generate_content(
-                        model='gemini-3.8-flash',
+                        model='gemini-2.5-flash',
                         contents=[image, prompt]
                     )
                     
@@ -90,13 +91,11 @@ if uploaded_file is not None:
                     st.markdown("---")
                     st.markdown("### Suggested Style Correction")
                     with st.spinner("Generating corrected outfit visualization..."):
-                        # Ask Gemini to create an image generation prompt based on the fix
                         vis_prompt_res = client.models.generate_content(
-                            model='gemini-3.8-flash',
-                            contents=[response.text, "Based on the 'The Fix' section above, write a detailed visual prompt for an image generator showing the person wearing the corrected, perfectly proportioned version of this outfit with proper colors, tucking, and grounding."]
+                            model='gemini-2.5-flash',
+                            contents=[response.text, "Based on the 'The Fix' section above, write a detailed visual prompt for an image generator showing a person wearing the corrected, perfectly proportioned version of this outfit with proper colors, tucking, and grounding. Describe only the final look visually."]
                         )
                         
-                        # Generate the image using Imagen
                         result = client.models.generate_images(
                             model='imagen-3.0-generate-002',
                             prompt=vis_prompt_res.text,
