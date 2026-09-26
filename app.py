@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from google import genai
 from google.genai.types import GenerateContentConfig, Modality
 from PIL import Image
@@ -61,6 +62,20 @@ if uploaded_file is not None:
         if "GEMINI_API_KEY" in st.secrets:
             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
             
+            # Helper function with automatic retry for 503 traffic spikes
+            def generate_with_retry(model_name, contents, config=None, max_retries=3):
+                for attempt in range(max_retries):
+                    try:
+                        if config:
+                            return client.models.generate_content(model=model_name, contents=contents, config=config)
+                        else:
+                            return client.models.generate_content(model=model_name, contents=contents)
+                    except Exception as err:
+                        if "503" in str(err) and attempt < max_retries - 1:
+                            time.sleep(2 * (attempt + 1))  # Wait before retrying
+                            continue
+                        raise err
+
             # Step 1: Expert Text Review
             with st.spinner("Analyzing structural mechanics, facial contrast, and tones..."):
                 try:
@@ -79,19 +94,16 @@ if uploaded_file is not None:
                     - **The Fix**
                     """
                     
-                    response = client.models.generate_content(
-                        model='gemini-3.8-flash',
-                        contents=[image, prompt]
-                    )
+                    response = generate_with_retry('gemini-3.8-flash', [image, prompt])
                     
                     st.markdown("---")
                     st.markdown("### PlainSight Review")
                     st.write(response.text)
                             
                 except Exception as e:
-                    st.error(f"An error occurred during analysis: {e}")
+                    st.error(f"Server is busy. Please try clicking 'Reveal the Truth' again in a moment. Details: {e}")
 
-            # Step 2: Visual Correction Generation (Safe Tier Handling)
+            # Step 2: Visual Correction Generation
             st.markdown("---")
             st.markdown("### Suggested Style Correction (Same Subject)")
             with st.spinner("Generating corrected outfit keeping the same person and likeness..."):
@@ -102,12 +114,10 @@ if uploaded_file is not None:
                         "and update the trousers to well-fitted, dark-toned structured pants to fix the proportions while keeping the background intact."
                     )
                     
-                    img_result = client.models.generate_content(
-                        model='gemini-3.1-flash-image-preview',
-                        contents=[image, edit_prompt],
-                        config=GenerateContentConfig(
-                            response_modalities=[Modality.TEXT, Modality.IMAGE]
-                        )
+                    img_result = generate_with_nested_retry = generate_with_retry(
+                        'gemini-3.1-flash-image-preview', 
+                        [image, edit_prompt], 
+                        config=GenerateContentConfig(response_modalities=[Modality.TEXT, Modality.IMAGE])
                     )
                     
                     has_image = False
@@ -120,10 +130,10 @@ if uploaded_file is not None:
                                 break
                     
                     if not has_image:
-                        st.info("The style analysis has provided the precise textual roadmap for your correction.")
+                        st.info("The style analysis text roadmap is complete.")
                         
                 except Exception as img_err:
-                    st.warning("Visual generation is temporarily resting due to API rate limits on the image model tier. Your expert text breakdown above gives you the exact styling instructions to achieve this look!")
+                    st.warning("Visual generation model is resting due to temporary server traffic. Your expert text breakdown above outlines the exact styling changes!")
                     
         else:
             st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
