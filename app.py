@@ -3,7 +3,7 @@ import time
 from google import genai
 from PIL import Image
 
-# 1. Page Configuration & Calm Nature-Inspired Styling
+# 1. Page Configuration & Natural Aesthetic Styling
 st.set_page_config(
     page_title="PlainSight",
     page_icon="🌿",
@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Calm, grounded natural tones (stone, sand, soft moss) */
+    /* Grounded, natural stone and sand tones */
     .stApp {
         background-color: #F5F4F0;
         color: #2F3530;
@@ -23,7 +23,7 @@ st.markdown("""
         font-weight: 500;
         letter-spacing: -0.4px;
     }
-    /* Muted forest/sage button */
+    /* Muted forest button */
     .stButton > button {
         background-color: #798678 !important;
         color: #FFFFFF !important;
@@ -36,7 +36,7 @@ st.markdown("""
     .stButton > button:hover {
         background-color: #637062 !important;
     }
-    /* Soft stone paper card container */
+    /* Soft stone container */
     div[data-testid="stFileUploader"] {
         background-color: #FAF9F6;
         border: 1px solid #D9D5CD;
@@ -48,8 +48,8 @@ st.markdown("""
 
 # 2. App Header
 st.title("PlainSight")
-st.markdown("*Mindful style guidance. Grounded in reality.*")
-st.write("Upload a photograph to receive a calm, balanced perspective and thoughtful styling guidance.")
+st.markdown("*Honest perspective. Real clarity.*")
+st.write("Upload an outfit photograph to receive a structured breakdown and thoughtful styling guidance.")
 
 st.markdown("---")
 
@@ -57,7 +57,7 @@ uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", 
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Reflected Perspective", use_container_width=True)
+    st.image(image, caption="Selected Image", use_container_width=True)
     
     if st.button("Reveal the Truth"):
         if "GEMINI_API_KEY" in st.secrets:
@@ -73,27 +73,27 @@ if uploaded_file is not None:
                             continue
                         raise err
 
-            with st.spinner("Observing harmony, proportion, and flow..."):
+            with st.spinner("Reviewing proportions and styling..."):
                 try:
                     prompt = """
-                    You are PlainSight, an intuitive, warm, and discerning style mentor. 
-                    Your approach is grounded, kind, and completely honest. Celebrate genuine style with appreciation when it works well, and offer gentle, constructive guidance when an outfit needs refinement. Never make cynical or harsh assumptions.
+                    You are PlainSight, an expert, observant, and discerning style mentor. 
+                    Your approach is grounded and completely honest. Celebrate genuine style with appreciation when it works well, and offer constructive guidance when an outfit needs refinement. Never make cynical assumptions.
                     
                     Analyze the image based on these principles:
-                    1. The Harmony & Strengths: Notice what feels natural, balanced, or expressive about the look.
-                    2. The Grounded Assessment: Evaluate proportions, color flow, and silhouette with calm clarity.
-                    3. Thoughtful Guidance: Provide gentle, practical suggestions to elevate or harmonize the outfit.
+                    1. The Strengths: Notice what feels natural, balanced, or expressive about the look.
+                    2. The Assessment: Evaluate proportions, color flow, and silhouette with clarity.
+                    3. Guidance: Provide practical, thoughtful suggestions to elevate or harmonize the outfit.
                     
                     Format your response precisely into these three sections using clear bold headings:
-                    - **The Essence & Strengths**
-                    - **The Balanced Perspective**
-                    - **Thoughtful Refinements**
+                    - **Strengths**
+                    - **Assessment**
+                    - **Refinements**
                     """
                     
                     response = generate_with_retry('gemini-3.8-flash', [image, prompt])
                     
                     st.markdown("---")
-                    st.markdown("### PlainSight Reflection")
+                    st.markdown("### Analysis")
                     st.write(response.text)
                     
                     st.success("Analysis complete.")
