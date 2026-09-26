@@ -1,8 +1,6 @@
 import streamlit as st
 from google import genai
-from google.genai.types import GenerateContentConfig, Modality
 from PIL import Image
-from io import BytesIO
 
 # 1. Page Configuration & Brand Aesthetic Styling
 st.set_page_config(
@@ -47,7 +45,7 @@ st.markdown("""
 # 2. App Header
 st.title("PlainSight")
 st.markdown("*Absolute clarity. Zero flattery.*")
-st.write("Upload a photo of an outfit to receive an unvarnished breakdown and a direct visual correction.")
+st.write("Upload a photo of an outfit to receive an unvarnished breakdown and professional style fix.")
 
 st.markdown("---")
 
@@ -59,19 +57,18 @@ if uploaded_file is not None:
     
     if st.button("Reveal the Truth"):
         if "GEMINI_API_KEY" in st.secrets:
-            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-            
-            # Step 1: Text & Style Analysis
             with st.spinner("Analyzing structural mechanics, facial contrast, and tones..."):
                 try:
+                    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                    
                     prompt = """
                     You are PlainSight, an objective, highly observant, and straight-talking style analyst. 
-                    Your job is to strip away polite illusions and tell the unvarnished truth about how this outfit works.
+                    You do not flatter people falsely. Your job is to strip away polite illusions and tell the unvarnished truth about how this outfit works.
                     
                     Analyze the image based on these strict guidelines:
                     1. Facial Harmony & Undertones: Evaluate facial features and skin undertones.
                     2. Mechanics & Proportions: Review color harmony, silhouette, scale, and cuts.
-                    3. Practical Fix: Provide a concrete, actionable correction.
+                    3. Practical Fix: Provide a concrete, actionable correction tailored precisely to this subject.
                     
                     Format your response precisely into these three sections using clear bold headings:
                     - **The Verdict**
@@ -79,8 +76,9 @@ if uploaded_file is not None:
                     - **The Fix**
                     """
                     
+                    # Using the updated, active model
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model='gemini-3.8-flash',
                         contents=[image, prompt]
                     )
                     
@@ -90,40 +88,5 @@ if uploaded_file is not None:
                             
                 except Exception as e:
                     st.error(f"An error occurred during analysis: {e}")
-
-            # Step 2: Visual Correction (Same Person, Fixed Outfit)
-            st.markdown("---")
-            st.markdown("### Suggested Style Correction (Same Subject)")
-            with st.spinner("Generating corrected outfit keeping the same person and likeness..."):
-                try:
-                    edit_prompt = (
-                        "Take this exact person from the image (keep their face, skin tone, hair, and likeness completely identical). "
-                        "Modify their clothing according to professional styling advice: replace the outfit's lower proportions "
-                        "with well-tailored, high-waisted dark-toned structured trousers that fit their frame correctly, "
-                        "ensuring a balanced 1:2 visual ratio while maintaining the same photo background and subject identity."
-                    )
-                    
-                    result = client.models.generate_content(
-                        model='gemini-3.1-flash-image-preview',
-                        contents=[image, edit_prompt],
-                        config=GenerateContentConfig(
-                            response_modalities=[Modality.TEXT, Modality.IMAGE]
-                        )
-                    )
-                    
-                    has_image = False
-                    for part in result.candidates[0].content.parts:
-                        if part.inline_data:
-                            corrected_img = Image.open(BytesIO(part.inline_data.data))
-                            st.image(corrected_img, caption="PlainSight Corrected Look (Same Person)", use_container_width=True)
-                            has_image = True
-                            break
-                    
-                    if not has_image:
-                        st.info("The model returned text guidance for the visual edit. Check your prompt configuration.")
-                        
-                except Exception as img_err:
-                    st.error(f"Could not render corrected image: {img_err}")
-                    
         else:
             st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
