@@ -1,6 +1,7 @@
 import streamlit as st
 from google import genai
 from PIL import Image
+from io import BytesIO
 
 # 1. Page Configuration & Brand Aesthetic Styling
 st.set_page_config(
@@ -45,7 +46,7 @@ st.markdown("""
 # 2. App Header
 st.title("PlainSight")
 st.markdown("*Absolute clarity. Zero flattery.*")
-st.write("Upload a photo of an outfit to receive an unvarnished, expert breakdown.")
+st.write("Upload a photo of an outfit to receive an unvarnished breakdown and a direct visual correction.")
 
 st.markdown("---")
 
@@ -63,13 +64,12 @@ if uploaded_file is not None:
                     
                     prompt = """
                     You are PlainSight, an objective, highly observant, and straight-talking style analyst. 
-                    You do not flatter people falsely, and you never hand out hollow compliments. 
                     Your job is to strip away polite illusions and tell the unvarnished truth about how this outfit works.
                     
                     Analyze the image based on these strict guidelines:
-                    1. Facial Harmony & Undertones: Evaluate facial features (soft vs. high-contrast/hard features) and skin undertones. Assess whether the chosen colors harmonize or actively clash/wash them out.
+                    1. Facial Harmony & Undertones: Evaluate facial features and skin undertones.
                     2. Mechanics & Proportions: Review color harmony, silhouette, scale, and cuts.
-                    3. Practical Fix: Never just tear it down; provide a concrete, actionable correction.
+                    3. Practical Fix: Provide a concrete, actionable correction.
                     
                     Format your response precisely into these three sections using clear bold headings:
                     - **The Verdict**
@@ -85,6 +85,35 @@ if uploaded_file is not None:
                     st.markdown("---")
                     st.markdown("### PlainSight Review")
                     st.write(response.text)
+                    
+                    # Style Correction Visual Generation
+                    st.markdown("---")
+                    st.markdown("### Suggested Style Correction (Same Subject)")
+                    with st.spinner("Generating corrected outfit keeping the same person..."):
+                        
+                        # Generate instruction prompt for image transformation
+                        edit_prompt_res = client.models.generate_content(
+                            model='gemini-3.8-flash',
+                            contents=[image, response.text, "Based on the original image and the 'The Fix' section, write a precise image generation instruction to modify this exact person's clothing. Emphasize keeping the exact same person's face, hair, and likeness, but update their clothing to match the proportions and dark-toned trousers recommended in the fix."]
+                        )
+                        
+                        # Call image generation model with image-to-image conditioning context
+                        result = client.models.generate_content(
+                            model='gemini-3.8-flash',
+                            contents=[image, f"Modify this photo: {edit_prompt_res.text}"]
+                        )
+                        
+                        # Display output if the model returns an image part
+                        has_image = False
+                        for part in result.candidates[0].content.parts:
+                            if part.inline_data:
+                                corrected_img = Image.open(BytesIO(part.inline_data.data))
+                                st.image(corrected_img, caption="PlainSight Corrected Look (Same Person)", use_container_width=True)
+                                has_image = True
+                                break
+                        
+                        if not has_image:
+                            st.info("The text model provided text adjustments. To render direct photo edits seamlessly, ensure your model endpoint supports native multimodal image edits.")
                             
                 except Exception as e:
                     st.error(f"An error occurred during analysis: {e}")
