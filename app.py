@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 from PIL import Image
 
 # 1. Page Configuration & Brand Aesthetic Styling
@@ -9,26 +9,20 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS matching our Bone, Charcoal, and Muted Olive brand identity
 st.markdown("""
     <style>
-    /* Global Background & Font Styling */
     .stApp {
-        background-color: #F7F5F0; /* Soft Bone / Off-White */
-        color: #222222;            /* Deep Charcoal */
+        background-color: #F7F5F0;
+        color: #222222;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    
-    /* Headers */
     h1, h2, h3 {
         color: #1A1A1A;
         font-weight: 600;
         letter-spacing: -0.5px;
     }
-    
-    /* Custom Button Styling (Muted Olive) */
     .stButton > button {
-        background-color: #6B705C !important; /* Muted Olive */
+        background-color: #6B705C !important;
         color: white !important;
         border: none !important;
         padding: 0.6rem 1.2rem;
@@ -39,8 +33,6 @@ st.markdown("""
     .stButton > button:hover {
         background-color: #555A48 !important;
     }
-    
-    /* File Uploader Container */
     div[data-testid="stFileUploader"] {
         background-color: #FFFFFF;
         border: 1px dashed #D0CBC3;
@@ -57,26 +49,18 @@ st.write("Upload a photo of an outfit to receive an unvarnished, expert breakdow
 
 st.markdown("---")
 
-# 3. Image Upload Section
 uploaded_file = st.file_uploader("Upload an outfit or style photo", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Display the uploaded image cleanly
     image = Image.open(uploaded_file)
     st.image(image, caption="Target Image for Analysis", use_column_width=True)
     
-    # Trigger Button
     if st.button("Reveal the Truth"):
-        # Check if API key is configured in Streamlit secrets
         if "GEMINI_API_KEY" in st.secrets:
-            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-            
             with st.spinner("Analyzing structural mechanics, facial contrast, and tones..."):
                 try:
-                    # Using the specialized multimodal vision model
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     
-                    # The Core PlainSight Rulebook Prompt
                     prompt = """
                     You are PlainSight, an objective, highly observant, and straight-talking style analyst. 
                     You do not flatter people falsely, and you never hand out hollow compliments. 
@@ -93,7 +77,10 @@ if uploaded_file is not None:
                     - **The Fix**
                     """
                     
-                    response = model.generate_content([prompt, image])
+                    response = client.models.generate_content(
+                        model='gemini-2.5-flash',
+                        contents=[image, prompt]
+                    )
                     
                     st.markdown("---")
                     st.markdown("### PlainSight Review")
