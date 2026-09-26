@@ -1,5 +1,6 @@
 import streamlit as st
 from google import genai
+from google.genai.types import GenerateContentConfig, Modality
 from PIL import Image
 from io import BytesIO
 
@@ -58,10 +59,11 @@ if uploaded_file is not None:
     
     if st.button("Reveal the Truth"):
         if "GEMINI_API_KEY" in st.secrets:
+            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+            
+            # Step 1: Text & Style Analysis
             with st.spinner("Analyzing structural mechanics, facial contrast, and tones..."):
                 try:
-                    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                    
                     prompt = """
                     You are PlainSight, an objective, highly observant, and straight-talking style analyst. 
                     Your job is to strip away polite illusions and tell the unvarnished truth about how this outfit works.
@@ -78,44 +80,50 @@ if uploaded_file is not None:
                     """
                     
                     response = client.models.generate_content(
-                        model='gemini-3.8-flash',
+                        model='gemini-2.5-flash',
                         contents=[image, prompt]
                     )
                     
                     st.markdown("---")
                     st.markdown("### PlainSight Review")
                     st.write(response.text)
-                    
-                    # Style Correction Visual Generation
-                    st.markdown("---")
-                    st.markdown("### Suggested Style Correction (Same Subject)")
-                    with st.spinner("Generating corrected outfit keeping the same person..."):
-                        
-                        # Generate instruction prompt for image transformation
-                        edit_prompt_res = client.models.generate_content(
-                            model='gemini-3.8-flash',
-                            contents=[image, response.text, "Based on the original image and the 'The Fix' section, write a precise image generation instruction to modify this exact person's clothing. Emphasize keeping the exact same person's face, hair, and likeness, but update their clothing to match the proportions and dark-toned trousers recommended in the fix."]
-                        )
-                        
-                        # Call image generation model with image-to-image conditioning context
-                        result = client.models.generate_content(
-                            model='gemini-3.8-flash',
-                            contents=[image, f"Modify this photo: {edit_prompt_res.text}"]
-                        )
-                        
-                        # Display output if the model returns an image part
-                        has_image = False
-                        for part in result.candidates[0].content.parts:
-                            if part.inline_data:
-                                corrected_img = Image.open(BytesIO(part.inline_data.data))
-                                st.image(corrected_img, caption="PlainSight Corrected Look (Same Person)", use_container_width=True)
-                                has_image = True
-                                break
-                        
-                        if not has_image:
-                            st.info("The text model provided text adjustments. To render direct photo edits seamlessly, ensure your model endpoint supports native multimodal image edits.")
                             
                 except Exception as e:
                     st.error(f"An error occurred during analysis: {e}")
+
+            # Step 2: Visual Correction (Same Person, Fixed Outfit)
+            st.markdown("---")
+            st.markdown("### Suggested Style Correction (Same Subject)")
+            with st.spinner("Generating corrected outfit keeping the same person and likeness..."):
+                try:
+                    edit_prompt = (
+                        "Take this exact person from the image (keep their face, skin tone, hair, and likeness completely identical). "
+                        "Modify their clothing according to professional styling advice: replace the outfit's lower proportions "
+                        "with well-tailored, high-waisted dark-toned structured trousers that fit their frame correctly, "
+                        "ensuring a balanced 1:2 visual ratio while maintaining the same photo background and subject identity."
+                    )
+                    
+                    result = client.models.generate_content(
+                        model='gemini-3.1-flash-image-preview',
+                        contents=[image, edit_prompt],
+                        config=GenerateContentConfig(
+                            response_modalities=[Modality.TEXT, Modality.IMAGE]
+                        )
+                    )
+                    
+                    has_image = False
+                    for part in result.candidates[0].content.parts:
+                        if part.inline_data:
+                            corrected_img = Image.open(BytesIO(part.inline_data.data))
+                            st.image(corrected_img, caption="PlainSight Corrected Look (Same Person)", use_container_width=True)
+                            has_image = True
+                            break
+                    
+                    if not has_image:
+                        st.info("The model returned text guidance for the visual edit. Check your prompt configuration.")
+                        
+                except Exception as img_err:
+                    st.error(f"Could not render corrected image: {img_err}")
+                    
         else:
             st.error("Gemini API key is missing. Please configure 'GEMINI_API_KEY' in your Streamlit secrets settings.")
