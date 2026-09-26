@@ -53,7 +53,7 @@ uploaded_file = st.file_uploader("Upload an outfit or style photo", type=["jpg",
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Target Image for Analysis", use_column_width=True)
+    st.image(image, caption="Target Image for Analysis", use_container_width=True)
     
     if st.button("Reveal the Truth"):
         if "GEMINI_API_KEY" in st.secrets:
