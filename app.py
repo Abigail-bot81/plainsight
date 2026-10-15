@@ -49,13 +49,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Updated category styles: Work gets the sleek midnight/navy look, Formal gets a lighter, soft champagne/gold tone
+# Individual styling for each category. You can change 'bg' (background) or 'text' for just the one you want!
 category_styles = {
-    "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       # Soft Green
-    "Work / Professional": {"bg": "#0F172A", "text": "#FBBF24", "border": "#334155"},     # Midnight Navy & Gold
-    "Formal / Evening": {"bg": "#FEF3C7", "text": "#92400E", "border": "#FDE68A"},      # Soft Champagne & Warm Bronze
-    "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   # Soft Teal
-    "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   # Soft Orange
+    "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       
+    "Work / Professional": {"bg": "#0F172A", "text": "#FBBF24", "border": "#334155"},     # <--- Change colors here for Work only
+    "Formal / Evening": {"bg": "#FEF3C7", "text": "#92400E", "border": "#FDE68A"},      
+    "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   
+    "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   
 }
 
 # 2. App Header
@@ -71,7 +71,7 @@ col1, col2 = st.columns([1, 1], gap="large")
 with col1:
     st.subheader("Target Image")
     
-    # Category Tags Selection (Original order preserved)
+    # Category Tags Selection
     category = st.selectbox(
         "Select Outfit Category",
         ["Casual / Everyday", "Work / Professional", "Formal / Evening", "Active / Athleisure", "Creative / Statement"]
