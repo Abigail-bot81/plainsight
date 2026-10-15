@@ -114,8 +114,19 @@ with col2:
                         
                         response = generate_with_retry('gemini-2.5-flash', [image, prompt])
                         
+                        # Color mapping dictionary for dynamic styling
+                        category_colors = {
+                            "Casual / Everyday": "#166534",        # Forest Green
+                            "Work / Professional": "#1D4ED8",      # Royal Blue
+                            "Formal / Evening": "#7E22CE",       # Deep Plum / Purple
+                            "Active / Athleisure": "#0D9488",    # Teal
+                            "Creative / Statement": "#C2410C"    # Burnt Orange
+                        }
+                        accent_color = category_colors.get(category, "#2563EB")
+                        
                         st.markdown("---")
-                        st.markdown(f"### Findings ({category})")
+                        # Dynamically style the header line color using HTML/CSS inline styling
+                        st.markdown(f"<h3 style='color: {accent_color}; border-bottom: 2px solid {accent_color}; padding-bottom: 5px;'>Findings ({category})</h3>", unsafe_allow_html=True)
                         st.write(response.text)
                         
                         st.success("Analysis complete.")
