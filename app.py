@@ -133,7 +133,8 @@ with col2:
                         - **Refinements**
                         """
                         
-                        response = generate_with_retry('gemini-2.5-flash', [image, prompt])
+                        # Updated to active model name
+                        response = generate_with_retry('gemini-3.8-flash', [image, prompt])
                         
                         st.markdown("---")
                         # Results header styled with the matching background and text color card style
