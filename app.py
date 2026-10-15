@@ -49,10 +49,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Individual styling for each category (Work updated to Light Blue background with Deep Blue text)
+# Individual styling for each category
 category_styles = {
     "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       
-    "Work / Professional": {"bg": "#DBEAFE", "text": "#1D4ED8", "border": "#BFDBFE"},     # Light Blue background with Deep Blue text
+    "Work / Professional": {"bg": "#DBEAFE", "text": "#1D4ED8", "border": "#BFDBFE"},     
     "Formal / Evening": {"bg": "#FEF3C7", "text": "#92400E", "border": "#FDE68A"},      
     "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   
     "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   
@@ -114,42 +114,58 @@ with col2:
                                 continue
                             raise err
 
-                with st.spinner("Reviewing proportions and styling..."):
-                    try:
-                        prompt = f"""
-                        You are PlainSight, an expert, observant, and discerning style mentor. 
-                        Your approach is grounded and completely honest. Celebrate genuine style with appreciation when it works well, and offer constructive guidance when an outfit needs refinement. Never make cynical assumptions.
-                        
-                        This outfit has been tagged as: {category}. Keep this context in mind when evaluating its purpose and appropriateness.
-                        
-                        Analyze the image based on these principles:
-                        1. The Strengths: Notice what feels natural, balanced, or expressive about the look.
-                        2. The Assessment: Evaluate proportions, color flow, and silhouette with clarity in relation to the {category} context.
-                        3. Guidance: Provide practical, thoughtful suggestions to elevate or harmonize the outfit.
-                        
-                        Format your response precisely into these three sections using clear bold headings:
-                        - **Strengths**
-                        - **Assessment**
-                        - **Refinements**
-                        """
-                        
-                        # Updated to active model name
-                        response = generate_with_retry('gemini-3.8-flash', [image, prompt])
-                        
-                        st.markdown("---")
-                        # Results header styled with the matching background and text color card style
-                        st.markdown(f"""
-                            <div style="background-color: {style['bg']}; color: {style['text']}; border-left: 4px solid {style['text']}; 
-                                        padding: 10px 15px; border-radius: 4px; font-weight: 600; font-size: 1.1rem; margin-bottom: 15px;">
-                                Findings ({category})
-                            </div>
-                        """, unsafe_allow_html=True)
-                        st.write(response.text)
-                        
-                        st.success("Analysis complete.")
-                                
-                    except Exception as e:
-                        st.error(f"The server is resting momentarily under high volume. Please wait a moment and try again. Details: {e}")
+                # Custom fashion-item loading placeholder
+                loading_placeholder = st.empty()
+                fashion_icons = ["👗 Dress", "👖 Pants", "👔 Shirt", "🧥 Jacket", "👠 Shoes"]
+                
+                # Animate through the clothing items while waiting
+                for i in range(3):
+                    icon = fashion_icons[i % len(fashion_icons)]
+                    loading_placeholder.markdown(f"""
+                        <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.7); border-radius: 8px; margin-bottom: 15px;">
+                            Styling in progress... Examining your {icon} ✨
+                        </div>
+                    """, unsafe_allow_html=True)
+                    time.sleep(0.6)
+
+                try:
+                    prompt = f"""
+                    You are PlainSight, an expert, observant, and discerning style mentor. 
+                    Your approach is grounded and completely honest. Celebrate genuine style with appreciation when it works well, and offer constructive guidance when an outfit needs refinement. Never make cynical assumptions.
+                    
+                    This outfit has been tagged as: {category}. Keep this context in mind when evaluating its purpose and appropriateness.
+                    
+                    Analyze the image based on these principles:
+                    1. The Strengths: Notice what feels natural, balanced, or expressive about the look.
+                    2. The Assessment: Evaluate proportions, color flow, and silhouette with clarity in relation to the {category} context.
+                    3. Guidance: Provide practical, thoughtful suggestions to elevate or harmonize the outfit.
+                    
+                    Format your response precisely into these three sections using clear bold headings:
+                    - **Strengths**
+                    - **Assessment**
+                    - **Refinements**
+                    """
+                    
+                    response = generate_with_retry('gemini-3.8-flash', [image, prompt])
+                    
+                    # Clear the custom loading message once complete
+                    loading_placeholder.empty()
+                    
+                    st.markdown("---")
+                    # Results header styled with the matching background and text color card style
+                    st.markdown(f"""
+                        <div style="background-color: {style['bg']}; color: {style['text']}; border-left: 4px solid {style['text']}; 
+                                    padding: 10px 15px; border-radius: 4px; font-weight: 600; font-size: 1.1rem; margin-bottom: 15px;">
+                            Findings ({category})
+                        </div>
+                    """, unsafe_allow_html=True)
+                    st.write(response.text)
+                    
+                    st.success("Analysis complete.")
+                            
+                except Exception as e:
+                    loading_placeholder.empty()
+                    st.error(f"The server is resting momentarily under high volume. Please wait a moment and try again. Details: {e}")
                         
             else:
                 st.error("API key configuration is missing in your settings.")
