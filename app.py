@@ -49,11 +49,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Soft background and matching text color mapping for categories
+# Refined category styles (Formal updated to a gorgeous Midnight Navy & Gold palette)
 category_styles = {
     "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       # Soft Green
     "Work / Professional": {"bg": "#DBEAFE", "text": "#1D4ED8", "border": "#BFDBFE"},     # Soft Blue
-    "Formal / Evening": {"bg": "#F3E8FF", "text": "#7E22CE", "border": "#E9D5FF"},      # Soft Purple
+    "Formal / Evening": {"bg": "#0F172A", "text": "#FBBF24", "border": "#334155"},      # Midnight Navy & Gold
     "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   # Soft Teal
     "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   # Soft Orange
 }
@@ -80,12 +80,12 @@ with col1:
     # Get the style dictionary for the selected category
     style = category_styles.get(category, {"bg": "#F1F5F9", "text": "#334155", "border": "#E2E8F0"})
     
-    # Render a beautiful pill/badge with the dynamic background color
+    # Render a clean pill/badge with just the category name and no "Active Tag:" text
     st.markdown(f"""
         <div style="background-color: {style['bg']}; color: {style['text']}; border: 1px solid {style['border']}; 
                     padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; 
                     margin-bottom: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            Active Tag: {category}
+            {category}
         </div>
     """, unsafe_allow_html=True)
     
