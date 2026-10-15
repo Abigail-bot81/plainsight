@@ -49,11 +49,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Refined category styles (Formal updated to a gorgeous Midnight Navy & Gold palette)
+# Updated category styles: Work gets the sleek midnight/navy look, Formal gets a lighter, soft champagne/gold tone
 category_styles = {
     "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       # Soft Green
-    "Work / Professional": {"bg": "#DBEAFE", "text": "#1D4ED8", "border": "#BFDBFE"},     # Soft Blue
-    "Formal / Evening": {"bg": "#0F172A", "text": "#FBBF24", "border": "#334155"},      # Midnight Navy & Gold
+    "Work / Professional": {"bg": "#0F172A", "text": "#FBBF24", "border": "#334155"},     # Midnight Navy & Gold
+    "Formal / Evening": {"bg": "#FEF3C7", "text": "#92400E", "border": "#FDE68A"},      # Soft Champagne & Warm Bronze
     "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   # Soft Teal
     "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   # Soft Orange
 }
@@ -71,7 +71,7 @@ col1, col2 = st.columns([1, 1], gap="large")
 with col1:
     st.subheader("Target Image")
     
-    # Category Tags Selection
+    # Category Tags Selection (Original order preserved)
     category = st.selectbox(
         "Select Outfit Category",
         ["Casual / Everyday", "Work / Professional", "Formal / Evening", "Active / Athleisure", "Creative / Statement"]
@@ -80,7 +80,7 @@ with col1:
     # Get the style dictionary for the selected category
     style = category_styles.get(category, {"bg": "#F1F5F9", "text": "#334155", "border": "#E2E8F0"})
     
-    # Render a clean pill/badge with just the category name and no "Active Tag:" text
+    # Render a clean pill/badge with just the category name
     st.markdown(f"""
         <div style="background-color: {style['bg']}; color: {style['text']}; border: 1px solid {style['border']}; 
                     padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; 
