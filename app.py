@@ -49,13 +49,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Color mapping dictionary for dynamic styling
-category_colors = {
-    "Casual / Everyday": "#166534",        # Forest Green
-    "Work / Professional": "#1D4ED8",      # Royal Blue
-    "Formal / Evening": "#7E22CE",       # Deep Plum / Purple
-    "Active / Athleisure": "#0D9488",    # Teal
-    "Creative / Statement": "#C2410C"    # Burnt Orange
+# Soft background and matching text color mapping for categories
+category_styles = {
+    "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       # Soft Green
+    "Work / Professional": {"bg": "#DBEAFE", "text": "#1D4ED8", "border": "#BFDBFE"},     # Soft Blue
+    "Formal / Evening": {"bg": "#F3E8FF", "text": "#7E22CE", "border": "#E9D5FF"},      # Soft Purple
+    "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   # Soft Teal
+    "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   # Soft Orange
 }
 
 # 2. App Header
@@ -77,18 +77,24 @@ with col1:
         ["Casual / Everyday", "Work / Professional", "Formal / Evening", "Active / Athleisure", "Creative / Statement"]
     )
     
-    # Get the active color for the currently selected category
-    current_color = category_colors.get(category, "#2563EB")
+    # Get the style dictionary for the selected category
+    style = category_styles.get(category, {"bg": "#F1F5F9", "text": "#334155", "border": "#E2E8F0"})
     
-    # Show an instant visual color indicator right under the dropdown
-    st.markdown(f"<div style='background-color: {current_color}; height: 4px; border-radius: 2px; margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+    # Render a beautiful pill/badge with the dynamic background color
+    st.markdown(f"""
+        <div style="background-color: {style['bg']}; color: {style['text']}; border: 1px solid {style['border']}; 
+                    padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; 
+                    margin-bottom: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            Active Tag: {category}
+        </div>
+    """, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", "png"])
     
     image = None
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption=f"Selected Image ({category})", use_container_width=True)
+        st.image(image, use_container_width=True)
 
 with col2:
     st.subheader("Analysis & Guidance")
@@ -130,8 +136,13 @@ with col2:
                         response = generate_with_retry('gemini-2.5-flash', [image, prompt])
                         
                         st.markdown("---")
-                        # Dynamically style the header line color using the category's custom color
-                        st.markdown(f"<h3 style='color: {current_color}; border-bottom: 2px solid {current_color}; padding-bottom: 5px;'>Findings ({category})</h3>", unsafe_allow_html=True)
+                        # Results header styled with the matching background and text color card style
+                        st.markdown(f"""
+                            <div style="background-color: {style['bg']}; color: {style['text']}; border-left: 4px solid {style['text']}; 
+                                        padding: 10px 15px; border-radius: 4px; font-weight: 600; font-size: 1.1rem; margin-bottom: 15px;">
+                                Findings ({category})
+                            </div>
+                        """, unsafe_allow_html=True)
                         st.write(response.text)
                         
                         st.success("Analysis complete.")
