@@ -61,12 +61,19 @@ col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
     st.subheader("Target Image")
+    
+    # Category Tags Selection
+    category = st.selectbox(
+        "Select Outfit Category",
+        ["Casual / Everyday", "Work / Professional", "Formal / Evening", "Active / Athleisure", "Creative / Statement"]
+    )
+    
     uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", "png"])
     
     image = None
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Selected Image", use_container_width=True)
+        st.image(image, caption=f"Selected Image ({category})", use_container_width=True)
 
 with col2:
     st.subheader("Analysis & Guidance")
@@ -88,13 +95,15 @@ with col2:
 
                 with st.spinner("Reviewing proportions and styling..."):
                     try:
-                        prompt = """
+                        prompt = f"""
                         You are PlainSight, an expert, observant, and discerning style mentor. 
                         Your approach is grounded and completely honest. Celebrate genuine style with appreciation when it works well, and offer constructive guidance when an outfit needs refinement. Never make cynical assumptions.
                         
+                        This outfit has been tagged as: {category}. Keep this context in mind when evaluating its purpose and appropriateness.
+                        
                         Analyze the image based on these principles:
                         1. The Strengths: Notice what feels natural, balanced, or expressive about the look.
-                        2. The Assessment: Evaluate proportions, color flow, and silhouette with clarity.
+                        2. The Assessment: Evaluate proportions, color flow, and silhouette with clarity in relation to the {category} context.
                         3. Guidance: Provide practical, thoughtful suggestions to elevate or harmonize the outfit.
                         
                         Format your response precisely into these three sections using clear bold headings:
@@ -103,10 +112,10 @@ with col2:
                         - **Refinements**
                         """
                         
-                        response = generate_with_retry('gemini-3.8-flash', [image, prompt])
+                        response = generate_with_retry('gemini-2.5-flash', [image, prompt])
                         
                         st.markdown("---")
-                        st.markdown("### Findings")
+                        st.markdown(f"### Findings ({category})")
                         st.write(response.text)
                         
                         st.success("Analysis complete.")
@@ -117,4 +126,4 @@ with col2:
             else:
                 st.error("API key configuration is missing in your settings.")
     else:
-        st.info("Upload an image on the left to begin your style review.")
+        st.info("Upload an image on the left and select a category to begin your style review.")
