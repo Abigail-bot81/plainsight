@@ -49,10 +49,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Individual styling for each category. Work / Professional updated to Gold background with Blue text.
+# Individual styling for each category (Work updated to Light Blue background with Deep Blue text)
 category_styles = {
     "Casual / Everyday": {"bg": "#DCFCE7", "text": "#166534", "border": "#BBF7D0"},       
-    "Work / Professional": {"bg": "#FDE047", "text": "#1E3A8A", "border": "#CA8A04"},     # Gold background with Blue text
+    "Work / Professional": {"bg": "#DBEAFE", "text": "#1D4ED8", "border": "#BFDBFE"},     # Light Blue background with Deep Blue text
     "Formal / Evening": {"bg": "#FEF3C7", "text": "#92400E", "border": "#FDE68A"},      
     "Active / Athleisure": {"bg": "#CCFBF1", "text": "#0F766E", "border": "#99F6E4"},   
     "Creative / Statement": {"bg": "#FFEDD5", "text": "#C2410C", "border": "#FED7AA"}   
