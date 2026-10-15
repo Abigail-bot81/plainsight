@@ -77,6 +77,12 @@ with col1:
         ["Casual / Everyday", "Work / Professional", "Formal / Evening", "Active / Athleisure", "Creative / Statement"]
     )
     
+    # Get the active color for the currently selected category
+    current_color = category_colors.get(category, "#2563EB")
+    
+    # Show an instant visual color indicator right under the dropdown
+    st.markdown(f"<div style='background-color: {current_color}; height: 4px; border-radius: 2px; margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+    
     uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", "png"])
     
     image = None
@@ -121,14 +127,11 @@ with col2:
                         - **Refinements**
                         """
                         
-                        # Updated to use the active model name
                         response = generate_with_retry('gemini-2.5-flash', [image, prompt])
                         
-                        accent_color = category_colors.get(category, "#2563EB")
-                        
                         st.markdown("---")
-                        # Dynamically style the header line color using HTML/CSS inline styling
-                        st.markdown(f"<h3 style='color: {accent_color}; border-bottom: 2px solid {accent_color}; padding-bottom: 5px;'>Findings ({category})</h3>", unsafe_allow_html=True)
+                        # Dynamically style the header line color using the category's custom color
+                        st.markdown(f"<h3 style='color: {current_color}; border-bottom: 2px solid {current_color}; padding-bottom: 5px;'>Findings ({category})</h3>", unsafe_allow_html=True)
                         st.write(response.text)
                         
                         st.success("Analysis complete.")
