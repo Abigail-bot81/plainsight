@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling with individual custom colors for Strengths, Assessment, and Refinements
+# Custom CSS styling including individual section card themes and centered completion message
 st.markdown("""
     <style>
     .main {
@@ -258,6 +258,11 @@ if st.button("Reveal the Truth"):
                         """, unsafe_allow_html=True)
                         st.markdown(body)
             
-            st.success("Analysis complete.")
+            # Centered, grey analysis complete message
+            st.markdown("""
+                <div style="text-align: center; color: #64748B; font-weight: 500; padding: 20px 0;">
+                    Analysis complete.
+                </div>
+            """, unsafe_allow_html=True)
         else:
             st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
