@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling with a unified, professional card theme for all sections
+# Custom CSS styling with a uniform, polished card theme for all sections
 st.markdown("""
     <style>
     .main {
@@ -77,7 +77,7 @@ st.markdown("""
         border: 1px solid #BFDBFE;
         border-radius: 12px;
         padding: 24px;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     .unified-header {
@@ -191,7 +191,7 @@ if st.button("Reveal the Truth"):
             
             st.markdown(f"### Findings ({category})")
             
-            # Splitting and rendering the output into identical uniform cards
+            # Cleanly split sections and render them into proportionate, identical cards
             sections = analysis_text.split("###")
             
             for section in sections:
@@ -200,12 +200,13 @@ if st.button("Reveal the Truth"):
                     title = parts[0].strip().replace("Slide", "").strip()
                     content = parts[1].strip() if len(parts) > 1 else ""
                     
-                    st.markdown(f"""
-                        <div class="unified-card">
-                            <div class="unified-header">{title}</div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown(content)
+                    if title in ["Strengths", "Assessment", "Refinements"]:
+                        st.markdown(f"""
+                            <div class="unified-card">
+                                <div class="unified-header">{title}</div>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown(content)
             
             st.success("Analysis complete.")
         else:
