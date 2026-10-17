@@ -150,7 +150,7 @@ if st.button("Reveal the Truth"):
             
         loading_placeholder.empty()
         
-        # Live Gemini AI Analysis structured into separate clear headers
+        # Live Gemini AI Analysis structured into separate clear presentation slides
         try:
             client = genai.Client()
             
@@ -160,7 +160,7 @@ if st.button("Reveal the Truth"):
             ### Slide 2: Assessment
             ### Slide 3: Refinements
             
-            Keep the content for each slide structured, insightful, and professional.
+            Keep the tone honest, insightful, and stylish. Make sure each section is fully detailed.
             """
             
             image_part = types.Part.from_bytes(
