@@ -165,7 +165,7 @@ if st.button("Reveal the Truth"):
                 ### Assessment
                 ### Refinements
                 
-                Keep the content fully detailed, insightful, and professional without cutting off.
+                Keep the content fully detailed, insightful, and professional.
                 """
                 
                 image_part = types.Part.from_bytes(
@@ -191,22 +191,33 @@ if st.button("Reveal the Truth"):
             
             st.markdown(f"### Findings ({category})")
             
-            # Cleanly split sections and render them into proportionate, identical cards
-            sections = analysis_text.split("###")
+            # Robust rendering helper to guarantee all sections display properly
+            sections_to_show = ["Strengths", "Assessment", "Refinements"]
             
-            for section in sections:
-                if section.strip():
-                    parts = section.split(":", 1)
-                    title = parts[0].strip().replace("Slide", "").strip()
-                    content = parts[1].strip() if len(parts) > 1 else ""
-                    
-                    if title in ["Strengths", "Assessment", "Refinements"]:
-                        st.markdown(f"""
-                            <div class="unified-card">
-                                <div class="unified-header">{title}</div>
-                            </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown(content)
+            for target_title in sections_to_show:
+                # Render the uniform card header box
+                st.markdown(f"""
+                    <div class="unified-card">
+                        <div class="unified-header">{target_title}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Extract the relevant text segment from the AI response safely
+                # Fallback to displaying the raw text chunk if custom search fails
+                if target_title.lower() in analysis_text.lower():
+                    try:
+                        parts = analysis_text.split(target_title)
+                        if len(parts) > 1:
+                            subpart = parts[1].split("###")[0].strip()
+                            if subpart.startswith(":"):
+                                subpart = subpart[1:].strip()
+                            st.markdown(subpart)
+                        else:
+                            st.markdown(analysis_text)
+                    except Exception:
+                        st.markdown(analysis_text)
+                else:
+                    st.markdown(analysis_text)
             
             st.success("Analysis complete.")
         else:
