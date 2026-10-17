@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including your exact category color themes and refined slide cards
+# Custom CSS styling including your category colors and unique feedback card colors
 st.markdown("""
     <style>
     .main {
@@ -71,24 +71,56 @@ st.markdown("""
         border: 1px solid #FED7AA;
     }
 
-    /* Refined Slide Container Styling */
-    .slide-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
+    /* Distinct Feedback Card Colors */
+    .card-strengths {
+        background-color: #F0FDF4; /* Soft Light Green */
+        border: 1px solid #BBF7D0;
         border-radius: 12px;
-        padding: 28px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
-    .slide-header {
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #2563EB;
+    .header-strengths {
+        color: #166534;
         font-weight: 700;
-        margin-bottom: 14px;
-        border-bottom: 2px solid #EFF6FF;
-        padding-bottom: 8px;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #DCFCE7;
+        padding-bottom: 6px;
+    }
+
+    .card-assessment {
+        background-color: #EFF6FF; /* Soft Light Blue */
+        border: 1px solid #BFDBFE;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+    .header-assessment {
+        color: #1E40AF;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #DBEAFE;
+        padding-bottom: 6px;
+    }
+
+    .card-refinements {
+        background-color: #FAF5FF; /* Soft Light Purple/Lavender */
+        border: 1px solid #E9D5FF;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+    .header-refinements {
+        color: #6B21A8;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #F3E8FF;
+        padding-bottom: 6px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -96,7 +128,7 @@ st.markdown("""
 # App Header Section
 st.title("PlainSight")
 st.markdown("*Honest perspective. Real clarity.*")
-st.write("Upload an outfit photograph to receive a structured breakdown in a slide-by-slide format.")
+st.write("Upload an outfit photograph to receive a structured, color-coded styling breakdown.")
 
 st.markdown("---")
 
@@ -127,7 +159,7 @@ if uploaded_file is not None:
 st.markdown("---")
 
 # Analysis Section
-st.subheader("Analysis & Guidance (Slide Presentation View)")
+st.subheader("Analysis & Guidance")
 
 if st.button("Reveal the Truth"):
     if uploaded_file is None:
@@ -152,7 +184,7 @@ if st.button("Reveal the Truth"):
             
         loading_placeholder.empty()
         
-        # Live Gemini AI Analysis with retry logic
+        # Live Gemini AI Analysis
         response = None
         error_message = None
         max_retries = 3
@@ -162,10 +194,10 @@ if st.button("Reveal the Truth"):
                 client = genai.Client()
                 
                 prompt = f"""
-                Analyze this outfit photo for the category '{category}'. You must return your analysis separated into three distinct sections using these exact headings:
-                ### Slide 1: Strengths
-                ### Slide 2: Assessment
-                ### Slide 3: Refinements
+                Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+                ### Strengths
+                ### Assessment
+                ### Refinements
                 
                 Keep the content clean, insightful, and professional.
                 """
@@ -193,25 +225,33 @@ if st.button("Reveal the Truth"):
             
             st.markdown(f"### Findings ({category})")
             
-            # Splitting and rendering the AI output into distinct clean cards using native Markdown rendering
-            slides = analysis_text.split("### Slide")
+            # Splitting and rendering the output into distinct custom-colored feedback boxes
+            sections = analysis_text.split("###")
             
-            for slide in slides:
-                if slide.strip():
-                    parts = slide.split(":", 1)
-                    slide_title = parts[0].strip()
-                    slide_content = parts[1].strip() if len(parts) > 1 else ""
+            for section in sections:
+                if section.strip():
+                    parts = section.split(":", 1)
+                    title = parts[0].strip().replace("Slide", "").strip() # Clean up any remnants of the word slide
+                    content = parts[1].strip() if len(parts) > 1 else ""
                     
-                    # Using Streamlit's native markdown container to properly format bolding and bullets
-                    with st.container():
-                        st.markdown(f"""
-                            <div class="slide-card">
-                                <div class="slide-header">Slide ➔ {slide_title}</div>
-                            </div>
-                        """, unsafe_allow_html=True)
-                        # Render content natively inside the visual card space
-                        st.markdown(slide_content)
+                    # Map each section to its unique color card style
+                    if "Strength" in title:
+                        card_class = "card-strengths"
+                        header_class = "header-strengths"
+                    elif "Assess" in title:
+                        card_class = "card-assessment"
+                        header_class = "header-assessment"
+                    else:
+                        card_class = "card-refinements"
+                        header_class = "header-refinements"
+                    
+                    st.markdown(f"""
+                        <div class="{card_class}">
+                            <div class="{header_class}">✦ {title}</div>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    st.markdown(content)
             
-            st.success("Slide presentation complete.")
+            st.success("Analysis complete.")
         else:
             st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
