@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including the darker background for Analysis Complete
+# Custom CSS styling including card themes, sidebar styling, and complete indicator
 st.markdown("""
     <style>
     .main {
@@ -76,17 +76,14 @@ st.markdown("""
         background-color: #DBEAFE;
         border: 1px solid #93C5FD;
         border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     .header-strengths {
         color: #1E40AF;
         font-weight: 700;
         font-size: 1.1rem;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #BFDBFE;
-        padding-bottom: 6px;
     }
 
     /* Assessment Card Theme (Gold) */
@@ -94,17 +91,14 @@ st.markdown("""
         background-color: #FEF08A;
         border: 1px solid #FDE047;
         border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     .header-assessment {
         color: #713F12;
         font-weight: 700;
         font-size: 1.1rem;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #FEF08A;
-        padding-bottom: 6px;
     }
 
     /* Refinements Card Theme (Green) */
@@ -112,20 +106,33 @@ st.markdown("""
         background-color: #BBF7D0;
         border: 1px solid #86EFAC;
         border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     .header-refinements {
         color: #14532D;
         font-weight: 700;
         font-size: 1.1rem;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #A7F3D0;
-        padding-bottom: 6px;
     }
     </style>
 """, unsafe_allow_html=True)
+
+# Initialize Session State for History Log
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+# Sidebar for Outfit History Log
+with st.sidebar:
+    st.header("📂 Outfit History Log")
+    st.write("Review previous analyses from this session.")
+    if not st.session_state.history:
+        st.info("No past analyses yet. Upload an outfit to start your log!")
+    else:
+        for idx, item in enumerate(reversed(st.session_state.history)):
+            with st.expander(f"{item['category']} ({item['time']})"):
+                st.image(item["image"], use_container_width=True)
+                st.markdown(item["text"])
 
 # App Header Section
 st.title("PlainSight")
@@ -225,9 +232,18 @@ if st.button("Reveal the Truth"):
         if response and hasattr(response, 'text'):
             analysis_text = response.text
             
+            # Save to Session History Log
+            current_time = time.strftime("%H:%M:%S")
+            st.session_state.history.append({
+                "category": category,
+                "time": current_time,
+                "image": uploaded_file.getvalue(),
+                "text": analysis_text
+            })
+            
             st.markdown(f"### Findings ({category})")
             
-            # Splitting and rendering the output into distinct color-coded cards
+            # Splitting and rendering the output into collapsible color-coded card expanders
             chunks = analysis_text.split("###")
             
             for chunk in chunks:
@@ -237,26 +253,29 @@ if st.button("Reveal the Truth"):
                     body = lines[1].strip() if len(lines) > 1 else ""
                     
                     if title == "Strengths":
-                        st.markdown(f"""
-                            <div class="card-strengths">
-                                <div class="header-strengths">{title}</div>
-                            </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown(body)
+                        with st.expander(f"✨ {title} (Click to expand/collapse)", expanded=True):
+                            st.markdown(f"""
+                                <div class="card-strengths">
+                                    <div class="header-strengths">{title}</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                            st.markdown(body)
                     elif title == "Assessment":
-                        st.markdown(f"""
-                            <div class="card-assessment">
-                                <div class="header-assessment">{title}</div>
-                            </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown(body)
+                        with st.expander(f"⭐ {title} (Click to expand/collapse)", expanded=True):
+                            st.markdown(f"""
+                                <div class="card-assessment">
+                                    <div class="header-assessment">{title}</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                            st.markdown(body)
                     elif title == "Refinements":
-                        st.markdown(f"""
-                            <div class="card-refinements">
-                                <div class="header-refinements">{title}</div>
-                            </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown(body)
+                        with st.expander(f"🎯 {title} (Click to expand/collapse)", expanded=True):
+                            st.markdown(f"""
+                                <div class="card-refinements">
+                                    <div class="header-refinements">{title}</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                            st.markdown(body)
             
             # Centered analysis complete message with a darker, distinct background pill
             st.markdown("""
@@ -266,5 +285,14 @@ if st.button("Reveal the Truth"):
                     </div>
                 </div>
             """, unsafe_allow_html=True)
+            
+            # Export / Download Button
+            report_markdown = f"# PlainSight Styling Report\n\n**Category:** {category}\n\n{analysis_text}"
+            st.download_button(
+                label="📥 Download Styling Report",
+                data=report_markdown,
+                file_name=f"plainsight_report_{category.lower().replace('/', '_').strip()}.md",
+                mime="text/markdown"
+            )
         else:
             st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
