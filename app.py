@@ -5,11 +5,21 @@ from google.genai import types
 
 st.set_page_config(page_title="PlainSight", page_icon="🔍", layout="centered")
 
-# Custom CSS styling
+# Custom CSS styling with your original color scheme and dropdown styling restored
 st.markdown("""
     <style>
+    .stApp {
+        background-color: #F8FAFC;
+    }
     .main {
         background-color: #F8FAFC;
+    }
+    /* Restoring your custom selectbox styling and colors */
+    div[data-baseweb="select"] > div {
+        background-color: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        color: #1E293B;
     }
     .stButton>button {
         width: 100%;
