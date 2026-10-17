@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including your exact category color themes and slide container styles
+# Custom CSS styling including your exact category color themes and refined slide cards
 st.markdown("""
     <style>
     .main {
@@ -71,22 +71,24 @@ st.markdown("""
         border: 1px solid #FED7AA;
     }
 
-    /* Slide Container Styling */
+    /* Refined Slide Container Styling */
     .slide-card {
         background-color: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 20px;
+        padding: 28px;
+        margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .slide-header {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: #2563EB;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 14px;
+        border-bottom: 2px solid #EFF6FF;
+        padding-bottom: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -150,7 +152,7 @@ if st.button("Reveal the Truth"):
             
         loading_placeholder.empty()
         
-        # Live Gemini AI Analysis with retry logic for temporary 503 surges
+        # Live Gemini AI Analysis with retry logic
         response = None
         error_message = None
         max_retries = 3
@@ -165,7 +167,7 @@ if st.button("Reveal the Truth"):
                 ### Slide 2: Assessment
                 ### Slide 3: Refinements
                 
-                Keep the content for each slide structured, insightful, and professional.
+                Keep the content clean, insightful, and professional.
                 """
                 
                 image_part = types.Part.from_bytes(
@@ -177,21 +179,21 @@ if st.button("Reveal the Truth"):
                     model='gemini-3.8-flash',
                     contents=[prompt, image_part]
                 )
-                break # Success, exit retry loop
+                break
             except Exception as e:
                 error_message = str(e)
                 if "503" in error_message or "Unavailable" in error_message:
-                    time.sleep(2) # Wait 2 seconds before trying again
+                    time.sleep(2)
                     continue
                 else:
-                    break # Break for non-503 errors
+                    break
 
         if response and hasattr(response, 'text'):
             analysis_text = response.text
             
             st.markdown(f"### Findings ({category})")
             
-            # Splitting and rendering the AI output into distinct visual "Slide Cards"
+            # Splitting and rendering the AI output into distinct clean cards using native Markdown rendering
             slides = analysis_text.split("### Slide")
             
             for slide in slides:
@@ -200,14 +202,15 @@ if st.button("Reveal the Truth"):
                     slide_title = parts[0].strip()
                     slide_content = parts[1].strip() if len(parts) > 1 else ""
                     
-                    st.markdown(f"""
-                        <div class="slide-card">
-                            <div class="slide-header">Slide ➔ {slide_title}</div>
-                            <div style="color: #1E293B; font-size: 1rem; line-height: 1.6;">
-                                {slide_content.replace(chr(10), '<br>')}
+                    # Using Streamlit's native markdown container to properly format bolding and bullets
+                    with st.container():
+                        st.markdown(f"""
+                            <div class="slide-card">
+                                <div class="slide-header">Slide ➔ {slide_title}</div>
                             </div>
-                        </div>
-                    """, unsafe_allow_html=True)
+                        """, unsafe_allow_html=True)
+                        # Render content natively inside the visual card space
+                        st.markdown(slide_content)
             
             st.success("Slide presentation complete.")
         else:
