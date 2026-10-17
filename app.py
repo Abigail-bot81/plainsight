@@ -5,7 +5,7 @@ from google.genai import types
 
 st.set_page_config(page_title="PlainSight", page_icon="🔍", layout="centered")
 
-# Custom CSS styling (Restored your custom background!)
+# Custom CSS styling with your original color scheme
 st.markdown("""
     <style>
     .stApp {
@@ -13,6 +13,13 @@ st.markdown("""
     }
     .main {
         background-color: #F8FAFC;
+    }
+    /* Custom styling for category selectbox */
+    div[data-baseweb="select"] > div {
+        background-color: #FFFFFF;
+        border-color: #CBD5E1;
+        border-radius: 8px;
+        color: #1E293B;
     }
     .stButton>button {
         width: 100%;
