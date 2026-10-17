@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including card themes, sidebar styling, and complete indicator
+# Custom CSS styling including logo lockup, card themes, and complete indicator
 st.markdown("""
     <style>
     .main {
@@ -33,6 +33,80 @@ st.markdown("""
         color: white;
     }
     
+    /* Logo & Brand Lockup Styling */
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 5px;
+        padding-top: 10px;
+    }
+    .scope-circle {
+        width: 75px;
+        height: 75px;
+        border: 4px solid #1E293B;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #FFFFFF;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    /* Crosshairs */
+    .scope-circle::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: #1E293B;
+    }
+    .scope-circle::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 100%;
+        background-color: #1E293B;
+    }
+    .crosshair-center {
+        position: absolute;
+        font-weight: 900;
+        font-size: 1.2rem;
+        color: #2563EB;
+        z-index: 2;
+    }
+    .brand-title-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .brand-name-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+    }
+    .brand-ps {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #1E293B;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+    .brand-main {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1E293B;
+        letter-spacing: -0.5px;
+        line-height: 1;
+    }
+    .brand-slogan {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-top: 6px;
+    }
+
     /* Custom Category Box Themes */
     .cat-casual {
         background-color: #EEF2FF;
@@ -134,9 +208,22 @@ with st.sidebar:
                 st.image(item["image"], use_container_width=True)
                 st.markdown(item["text"])
 
-# App Header Section
-st.title("PlainSight")
-st.markdown("*Honest perspective. Real clarity.*")
+# Custom Scope Logo & Header Lockup (Jacques's Concept)
+st.markdown("""
+    <div class="logo-container">
+        <div class="scope-circle">
+            <div class="crosshair-center">+</div>
+        </div>
+        <div class="brand-title-group">
+            <div class="brand-name-row">
+                <span class="brand-ps">PS</span>
+                <span class="brand-main">PlainSight</span>
+            </div>
+            <div class="brand-slogan">No filters</div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
 st.write("Upload an outfit photograph to receive a structured styling breakdown.")
 
 st.markdown("---")
