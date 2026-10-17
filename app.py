@@ -150,29 +150,43 @@ if st.button("Reveal the Truth"):
             
         loading_placeholder.empty()
         
-        # Live Gemini AI Analysis structured into separate clear presentation slides
-        try:
-            client = genai.Client()
-            
-            prompt = f"""
-            Analyze this outfit photo for the category '{category}'. You must return your analysis separated into three distinct sections using these exact headings:
-            ### Slide 1: Strengths
-            ### Slide 2: Assessment
-            ### Slide 3: Refinements
-            
-            Keep the tone honest, insightful, and stylish. Make sure each section is fully detailed.
-            """
-            
-            image_part = types.Part.from_bytes(
-                data=uploaded_file.getvalue(),
-                mime_type=uploaded_file.type
-            )
-            
-            response = client.models.generate_content(
-                model='gemini-3.8-flash',
-                contents=[prompt, image_part]
-            )
-            
+        # Live Gemini AI Analysis with retry logic for temporary 503 surges
+        response = None
+        error_message = None
+        max_retries = 3
+        
+        for attempt in range(max_retries):
+            try:
+                client = genai.Client()
+                
+                prompt = f"""
+                Analyze this outfit photo for the category '{category}'. You must return your analysis separated into three distinct sections using these exact headings:
+                ### Slide 1: Strengths
+                ### Slide 2: Assessment
+                ### Slide 3: Refinements
+                
+                Keep the content for each slide structured, insightful, and professional.
+                """
+                
+                image_part = types.Part.from_bytes(
+                    data=uploaded_file.getvalue(),
+                    mime_type=uploaded_file.type
+                )
+                
+                response = client.models.generate_content(
+                    model='gemini-3.8-flash',
+                    contents=[prompt, image_part]
+                )
+                break # Success, exit retry loop
+            except Exception as e:
+                error_message = str(e)
+                if "503" in error_message or "Unavailable" in error_message:
+                    time.sleep(2) # Wait 2 seconds before trying again
+                    continue
+                else:
+                    break # Break for non-503 errors
+
+        if response and hasattr(response, 'text'):
             analysis_text = response.text
             
             st.markdown(f"### Findings ({category})")
@@ -196,6 +210,5 @@ if st.button("Reveal the Truth"):
                     """, unsafe_allow_html=True)
             
             st.success("Slide presentation complete.")
-            
-        except Exception as e:
-            st.error(f"An error occurred during analysis: {e}")
+        else:
+            st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
