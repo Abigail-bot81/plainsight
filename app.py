@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including individual section card themes and centered completion message
+# Custom CSS styling including the darker background for Analysis Complete
 st.markdown("""
     <style>
     .main {
@@ -73,8 +73,8 @@ st.markdown("""
 
     /* Strengths Card Theme (Blue) */
     .card-strengths {
-        background-color: #EFF6FF;
-        border: 1px solid #BFDBFE;
+        background-color: #DBEAFE;
+        border: 1px solid #93C5FD;
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 24px;
@@ -85,43 +85,43 @@ st.markdown("""
         font-weight: 700;
         font-size: 1.1rem;
         margin-bottom: 12px;
-        border-bottom: 2px solid #DBEAFE;
+        border-bottom: 2px solid #BFDBFE;
         padding-bottom: 6px;
     }
 
     /* Assessment Card Theme (Gold) */
     .card-assessment {
-        background-color: #FEFCE8;
-        border: 1px solid #FEF08A;
+        background-color: #FEF08A;
+        border: 1px solid #FDE047;
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     .header-assessment {
-        color: #854D0E;
+        color: #713F12;
         font-weight: 700;
         font-size: 1.1rem;
         margin-bottom: 12px;
-        border-bottom: 2px solid #FEF9C3;
+        border-bottom: 2px solid #FEF08A;
         padding-bottom: 6px;
     }
 
     /* Refinements Card Theme (Green) */
     .card-refinements {
-        background-color: #F0FDF4;
-        border: 1px solid #BBF7D0;
+        background-color: #BBF7D0;
+        border: 1px solid #86EFAC;
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     .header-refinements {
-        color: #166534;
+        color: #14532D;
         font-weight: 700;
         font-size: 1.1rem;
         margin-bottom: 12px;
-        border-bottom: 2px solid #DCFCE7;
+        border-bottom: 2px solid #A7F3D0;
         padding-bottom: 6px;
     }
     </style>
@@ -258,10 +258,12 @@ if st.button("Reveal the Truth"):
                         """, unsafe_allow_html=True)
                         st.markdown(body)
             
-            # Centered, grey analysis complete message
+            # Centered analysis complete message with a darker, distinct background pill
             st.markdown("""
-                <div style="text-align: center; color: #64748B; font-weight: 500; padding: 20px 0;">
-                    Analysis complete.
+                <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+                    <div style="background-color: #E2E8F0; color: #334155; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        Analysis complete.
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
         else:
