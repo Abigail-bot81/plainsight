@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including your exact category color themes
+# Custom CSS styling including your exact category color themes and slide container styles
 st.markdown("""
     <style>
     .main {
@@ -70,13 +70,31 @@ st.markdown("""
         margin-bottom: 10px;
         border: 1px solid #FED7AA;
     }
+
+    /* Slide Container Styling */
+    .slide-card {
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .slide-header {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #2563EB;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # App Header Section
 st.title("PlainSight")
 st.markdown("*Honest perspective. Real clarity.*")
-st.write("Upload an outfit photograph to receive a structured breakdown and thoughtful styling guidance.")
+st.write("Upload an outfit photograph to receive a structured breakdown in a slide-by-slide format.")
 
 st.markdown("---")
 
@@ -107,7 +125,7 @@ if uploaded_file is not None:
 st.markdown("---")
 
 # Analysis Section
-st.subheader("Analysis & Guidance")
+st.subheader("Analysis & Guidance (Slide Presentation View)")
 
 if st.button("Reveal the Truth"):
     if uploaded_file is None:
@@ -132,16 +150,17 @@ if st.button("Reveal the Truth"):
             
         loading_placeholder.empty()
         
-        # Live Gemini AI Analysis for the uploaded photo
+        # Live Gemini AI Analysis structured into separate clear headers
         try:
             client = genai.Client()
             
             prompt = f"""
-            Analyze this outfit photo for the category '{category}'. Provide a structured breakdown with:
-            1. **Strengths** (What works well)
-            2. **Assessment** (Overall fit, proportions, and styling critique)
-            3. **Refinements** (Actionable suggestions for improvement)
-            Keep the tone honest, insightful, and stylish.
+            Analyze this outfit photo for the category '{category}'. You must return your analysis separated into three distinct sections using these exact headings:
+            ### Slide 1: Strengths
+            ### Slide 2: Assessment
+            ### Slide 3: Refinements
+            
+            Keep the content for each slide structured, insightful, and professional.
             """
             
             image_part = types.Part.from_bytes(
@@ -154,10 +173,29 @@ if st.button("Reveal the Truth"):
                 contents=[prompt, image_part]
             )
             
-            # Results Display Area
+            analysis_text = response.text
+            
             st.markdown(f"### Findings ({category})")
-            st.markdown(response.text)
-            st.success("Analysis complete.")
+            
+            # Splitting and rendering the AI output into distinct visual "Slide Cards"
+            slides = analysis_text.split("### Slide")
+            
+            for slide in slides:
+                if slide.strip():
+                    parts = slide.split(":", 1)
+                    slide_title = parts[0].strip()
+                    slide_content = parts[1].strip() if len(parts) > 1 else ""
+                    
+                    st.markdown(f"""
+                        <div class="slide-card">
+                            <div class="slide-header">Slide ➔ {slide_title}</div>
+                            <div style="color: #1E293B; font-size: 1rem; line-height: 1.6;">
+                                {slide_content.replace(chr(10), '<br>')}
+                            </div>
+                        </div>
+                    """, unsafe_allow_html=True)
+            
+            st.success("Slide presentation complete.")
             
         except Exception as e:
             st.error(f"An error occurred during analysis: {e}")
