@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including your category colors and unique feedback card colors
+# Custom CSS styling with a unified, professional card theme for all sections
 st.markdown("""
     <style>
     .main {
@@ -71,55 +71,21 @@ st.markdown("""
         border: 1px solid #FED7AA;
     }
 
-    /* Distinct Feedback Card Colors */
-    .card-strengths {
-        background-color: #F0FDF4; /* Soft Light Green */
-        border: 1px solid #BBF7D0;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-    }
-    .header-strengths {
-        color: #166534;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #DCFCE7;
-        padding-bottom: 6px;
-    }
-
-    .card-assessment {
-        background-color: #EFF6FF; /* Soft Light Blue */
+    /* Uniform Feedback Card Style matching Assessment */
+    .unified-card {
+        background-color: #EFF6FF;
         border: 1px solid #BFDBFE;
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 20px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
-    .header-assessment {
+    .unified-header {
         color: #1E40AF;
         font-weight: 700;
         font-size: 1.1rem;
         margin-bottom: 12px;
         border-bottom: 2px solid #DBEAFE;
-        padding-bottom: 6px;
-    }
-
-    .card-refinements {
-        background-color: #FAF5FF; /* Soft Light Purple/Lavender */
-        border: 1px solid #E9D5FF;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-    }
-    .header-refinements {
-        color: #6B21A8;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #F3E8FF;
         padding-bottom: 6px;
     }
     </style>
@@ -128,7 +94,7 @@ st.markdown("""
 # App Header Section
 st.title("PlainSight")
 st.markdown("*Honest perspective. Real clarity.*")
-st.write("Upload an outfit photograph to receive a structured, color-coded styling breakdown.")
+st.write("Upload an outfit photograph to receive a structured styling breakdown.")
 
 st.markdown("---")
 
@@ -199,7 +165,7 @@ if st.button("Reveal the Truth"):
                 ### Assessment
                 ### Refinements
                 
-                Keep the content clean, insightful, and professional.
+                Keep the content fully detailed, insightful, and professional without cutting off.
                 """
                 
                 image_part = types.Part.from_bytes(
@@ -225,29 +191,18 @@ if st.button("Reveal the Truth"):
             
             st.markdown(f"### Findings ({category})")
             
-            # Splitting and rendering the output into distinct custom-colored feedback boxes
+            # Splitting and rendering the output into identical uniform cards
             sections = analysis_text.split("###")
             
             for section in sections:
                 if section.strip():
                     parts = section.split(":", 1)
-                    title = parts[0].strip().replace("Slide", "").strip() # Clean up any remnants of the word slide
+                    title = parts[0].strip().replace("Slide", "").strip()
                     content = parts[1].strip() if len(parts) > 1 else ""
                     
-                    # Map each section to its unique color card style
-                    if "Strength" in title:
-                        card_class = "card-strengths"
-                        header_class = "header-strengths"
-                    elif "Assess" in title:
-                        card_class = "card-assessment"
-                        header_class = "header-assessment"
-                    else:
-                        card_class = "card-refinements"
-                        header_class = "header-refinements"
-                    
                     st.markdown(f"""
-                        <div class="{card_class}">
-                            <div class="{header_class}">✦ {title}</div>
+                        <div class="unified-card">
+                            <div class="unified-header">{title}</div>
                         </div>
                     """, unsafe_allow_html=True)
                     st.markdown(content)
