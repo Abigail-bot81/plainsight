@@ -5,9 +5,12 @@ from google.genai import types
 
 st.set_page_config(page_title="PlainSight", page_icon="🔍", layout="centered")
 
-# Custom CSS styling
+# Custom CSS styling (Restored your custom background!)
 st.markdown("""
     <style>
+    .stApp {
+        background-color: #F8FAFC;
+    }
     .main {
         background-color: #F8FAFC;
     }
