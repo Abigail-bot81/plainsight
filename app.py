@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 from google import genai
+from google.genai import types
 
 st.set_page_config(page_title="PlainSight", page_icon="🔍", layout="centered")
 
@@ -72,6 +73,7 @@ if st.button("Reveal the Truth"):
         # Live AI Analysis using Gemini
         try:
             client = genai.Client()
+            
             prompt = f"""
             Analyze this outfit photo for the category '{category}'. Provide a structured breakdown with:
             1. **Strengths** (What works well)
@@ -80,9 +82,15 @@ if st.button("Reveal the Truth"):
             Keep the tone honest, insightful, and stylish.
             """
             
+            # Wrap image bytes correctly for the Gemini API
+            image_part = types.Part.from_bytes(
+                data=uploaded_file.getvalue(),
+                mime_type=uploaded_file.type
+            )
+            
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
-                contents=[prompt, uploaded_file.getvalue()]
+                contents=[prompt, image_part]
             )
             
             # Results Display
