@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling with your original dropdown styling and color themes
+# Custom CSS styling including your exact category color themes
 st.markdown("""
     <style>
     .main {
@@ -32,12 +32,43 @@ st.markdown("""
         background-color: #1D4ED8;
         color: white;
     }
-    /* Custom styling for selectbox box and dropdown options */
-    div[data-baseweb="select"] > div {
-        background-color: #FFFFFF;
-        border: 1px solid #CBD5E1;
+    
+    /* Custom Category Box Themes */
+    .cat-casual {
+        background-color: #EEF2FF;
+        color: #4F46E5;
+        padding: 12px 16px;
         border-radius: 8px;
-        color: #1E293B;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border: 1px solid #C7D2FE;
+    }
+    .cat-business {
+        background-color: #E0F2FE;
+        color: #1E3A8A;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border: 1px solid #BFDBFE;
+    }
+    .cat-evening {
+        background-color: #FEF3C7;
+        color: #581C87;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border: 1px solid #FDE68A;
+    }
+    .cat-athleisure {
+        background-color: #FFEDD5;
+        color: #14532D;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border: 1px solid #FED7AA;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -52,11 +83,21 @@ st.markdown("---")
 # Target Image Section
 st.subheader("Target Image")
 
-# Your original dropdown component
+# Category selection mapped to your custom styled themes
 category = st.selectbox(
     "Select Outfit Category", 
     ["Casual / Everyday", "Business / Formal", "Evening / Special Occasion", "Athleisure"]
 )
+
+# Render the active category box with your exact custom colors
+if category == "Casual / Everyday":
+    st.markdown('<div class="cat-casual">✨ Active Category: Casual / Everyday</div>', unsafe_allow_html=True)
+elif category == "Business / Formal":
+    st.markdown('<div class="cat-business">💼 Active Category: Business / Formal</div>', unsafe_allow_html=True)
+elif category == "Evening / Special Occasion":
+    st.markdown('<div class="cat-evening">🌙 Active Category: Evening / Special Occasion</div>', unsafe_allow_html=True)
+else:
+    st.markdown('<div class="cat-athleisure">⚡ Active Category: Athleisure</div>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", "png"])
 
