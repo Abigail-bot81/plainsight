@@ -3,12 +3,20 @@ import streamlit as st
 from google import genai
 from google.genai import types
 
-st.set_page_config(page_title="PlainSight", page_icon="🔍", layout="centered")
+# Page Configuration
+st.set_page_config(
+    page_title="PlainSight", 
+    page_icon="🔍", 
+    layout="centered"
+)
 
-# Custom CSS styling (Your original design)
+# Custom CSS styling for the complete interface
 st.markdown("""
     <style>
     .main {
+        background-color: #F8FAFC;
+    }
+    .stApp {
         background-color: #F8FAFC;
     }
     .stButton>button {
@@ -24,9 +32,14 @@ st.markdown("""
         background-color: #1D4ED8;
         color: white;
     }
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: #FFFFFF;
+        border-radius: 8px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
+# App Header Section
 st.title("PlainSight")
 st.markdown("*Honest perspective. Real clarity.*")
 st.write("Upload an outfit photograph to receive a structured breakdown and thoughtful styling guidance.")
@@ -35,7 +48,10 @@ st.markdown("---")
 
 # Target Image Section
 st.subheader("Target Image")
-category = st.selectbox("Select Outfit Category", ["Casual / Everyday", "Business / Formal", "Evening / Special Occasion", "Athleisure"])
+category = st.selectbox(
+    "Select Outfit Category", 
+    ["Casual / Everyday", "Business / Formal", "Evening / Special Occasion", "Athleisure"]
+)
 
 uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", "png"])
 
@@ -70,7 +86,7 @@ if st.button("Reveal the Truth"):
             
         loading_placeholder.empty()
         
-        # Live Gemini AI Analysis (Dynamic based on uploaded photo and category)
+        # Live Gemini AI Analysis for the uploaded photo
         try:
             client = genai.Client()
             
@@ -92,6 +108,7 @@ if st.button("Reveal the Truth"):
                 contents=[prompt, image_part]
             )
             
+            # Results Display Area matching your original structure
             st.markdown(f"### Findings ({category})")
             st.markdown(response.text)
             st.success("Analysis complete.")
