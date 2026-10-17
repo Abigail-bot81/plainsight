@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling with a uniform, polished card theme for all sections
+# Custom CSS styling with individual custom colors for Strengths, Assessment, and Refinements
 st.markdown("""
     <style>
     .main {
@@ -71,8 +71,8 @@ st.markdown("""
         border: 1px solid #FED7AA;
     }
 
-    /* Uniform Feedback Card Style matching Assessment */
-    .unified-card {
+    /* Strengths Card Theme (Blue) */
+    .card-strengths {
         background-color: #EFF6FF;
         border: 1px solid #BFDBFE;
         border-radius: 12px;
@@ -80,12 +80,48 @@ st.markdown("""
         margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
-    .unified-header {
+    .header-strengths {
         color: #1E40AF;
         font-weight: 700;
         font-size: 1.1rem;
         margin-bottom: 12px;
         border-bottom: 2px solid #DBEAFE;
+        padding-bottom: 6px;
+    }
+
+    /* Assessment Card Theme (Gold) */
+    .card-assessment {
+        background-color: #FEFCE8;
+        border: 1px solid #FEF08A;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+    .header-assessment {
+        color: #854D0E;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #FEF9C3;
+        padding-bottom: 6px;
+    }
+
+    /* Refinements Card Theme (Green) */
+    .card-refinements {
+        background-color: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+    .header-refinements {
+        color: #166534;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #DCFCE7;
         padding-bottom: 6px;
     }
     </style>
@@ -191,33 +227,36 @@ if st.button("Reveal the Truth"):
             
             st.markdown(f"### Findings ({category})")
             
-            # Robust rendering helper to guarantee all sections display properly
-            sections_to_show = ["Strengths", "Assessment", "Refinements"]
+            # Splitting and rendering the output into distinct color-coded cards
+            chunks = analysis_text.split("###")
             
-            for target_title in sections_to_show:
-                # Render the uniform card header box
-                st.markdown(f"""
-                    <div class="unified-card">
-                        <div class="unified-header">{target_title}</div>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                # Extract the relevant text segment from the AI response safely
-                # Fallback to displaying the raw text chunk if custom search fails
-                if target_title.lower() in analysis_text.lower():
-                    try:
-                        parts = analysis_text.split(target_title)
-                        if len(parts) > 1:
-                            subpart = parts[1].split("###")[0].strip()
-                            if subpart.startswith(":"):
-                                subpart = subpart[1:].strip()
-                            st.markdown(subpart)
-                        else:
-                            st.markdown(analysis_text)
-                    except Exception:
-                        st.markdown(analysis_text)
-                else:
-                    st.markdown(analysis_text)
+            for chunk in chunks:
+                if chunk.strip():
+                    lines = chunk.strip().split("\n", 1)
+                    title = lines[0].strip().replace("#", "").strip()
+                    body = lines[1].strip() if len(lines) > 1 else ""
+                    
+                    if title == "Strengths":
+                        st.markdown(f"""
+                            <div class="card-strengths">
+                                <div class="header-strengths">{title}</div>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown(body)
+                    elif title == "Assessment":
+                        st.markdown(f"""
+                            <div class="card-assessment">
+                                <div class="header-assessment">{title}</div>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown(body)
+                    elif title == "Refinements":
+                        st.markdown(f"""
+                            <div class="card-refinements">
+                                <div class="header-refinements">{title}</div>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown(body)
             
             st.success("Analysis complete.")
         else:
