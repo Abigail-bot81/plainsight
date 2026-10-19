@@ -185,7 +185,7 @@ with st.sidebar:
 # Display the custom PNG Logo Lockup
 st.image("PlainSight logo.png", width=200)
 
-st.write("Upload an outfit photograph to receive a structured styling breakdown.")
+st.markdown("<p style='color: #F8FAFC; font-weight: 600;'>Upload an outfit photograph to receive a structured styling breakdown.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # Target Image Section
