@@ -236,10 +236,10 @@ if uploaded_file is not None:
                 time.sleep(1.2)
             loading_placeholder.empty()
 
-            # Live Gemini AI Analysis
+            # Live Gemini AI Analysis with automatic fallback/retries
             response = None
             error_message = None
-            max_retries = 3
+            max_retries = 5
 
             for attempt in range(max_retries):
                 try:
@@ -256,14 +256,14 @@ if uploaded_file is not None:
                         mime_type=uploaded_file.type
                     )
                     response = client.models.generate_content(
-                        model='gemini-3.8-flash',
+                        model='gemini-flash-latest',
                         contents=[prompt, image_part]
                     )
                     break
                 except Exception as e:
                     error_message = str(e)
-                    if "503" in error_message or "Unavailable" in error_message:
-                        time.sleep(2)
+                    if "503" in error_message or "Unavailable" in error_message or "high demand" in error_message:
+                        time.sleep(3) # wait 3 seconds before trying again automatically
                         continue
                     else:
                         break
