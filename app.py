@@ -11,7 +11,6 @@ st.set_page_config(
 )
 
 # Custom CSS styling with dark blue gradient background and light text
-# Custom CSS styling with dark blue gradient background and light text
 st.markdown("""
 <style>
     .main {
@@ -42,30 +41,13 @@ st.markdown("""
     h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
         color: #F8FAFC !important;
     }
-    .main {
-        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
-        background-attachment: fixed;
-    }
-    .stApp {
-        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
-        background-attachment: fixed;
-    }
-    
-    /* Global text color adjustment for readability on dark background */
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
-        color: #F8FAFC !important;
-    }
 
-    /* Force all text inside the sidebar to be bright white */
-    section[data-testid="stSidebar"] h1, 
-    section[data-testid="stSidebar"] h2, 
-    section[data-testid="stSidebar"] h3, 
-    section[data-testid="stSidebar"] p, 
-    section[data-testid="stSidebar"] span, 
-    section[data-testid="stSidebar"] label, 
-    section[data-testid="stSidebar"] div,
-    section[data-testid="stSidebar"] .stMarkdown {
-        color: #F8FAFC !important;
+    /* Fix file uploader text so it stays dark and readable */
+    [data-testid="stFileUploader"] section, 
+    [data-testid="stFileUploader"] span, 
+    [data-testid="stFileUploader"] small,
+    [data-testid="stFileUploader"] div {
+        color: #1E293B !important;
     }
 
     .stButton>button {
