@@ -122,7 +122,7 @@ st.markdown("""
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# Sidebar for Outfit History Log
+# Sidebar for Outfit History Log & Session Export
 with st.sidebar:
     st.header("📂 Outfit History Log")
     st.write("Review previous analyses from this session.")
@@ -130,12 +130,26 @@ with st.sidebar:
     if not st.session_state.history:
         st.info("No past analyses yet. Upload an outfit to start your log!")
     else:
+        # Button to export all session history combined into one document
+        session_export_markdown = "# PlainSight - Complete Session Styling Report\n\n"
+        for item in st.session_state.history:
+            session_export_markdown += f"## Category: {item['category']} (Time: {item['time']})\n\n{item['text']}\n\n---\n\n"
+            
+        st.download_button(
+            label="📥 Download Session Report",
+            data=session_export_markdown,
+            file_name="plainsight_complete_session_report.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
+        st.markdown("---")
+
         for idx, item in enumerate(reversed(st.session_state.history)):
             with st.expander(f"{item['category']} ({item['time']})"):
                 st.image(item["image"], use_container_width=True)
                 st.markdown(item["text"])
 
-# Display the custom PNG Logo Lockup (scaled down for better layout flow)
+# Display the custom PNG Logo Lockup
 st.image("PlainSight logo.png", width=200)
 
 st.write("Upload an outfit photograph to receive a structured styling breakdown.")
@@ -276,7 +290,7 @@ if uploaded_file is not None:
                     </div>
                 """, unsafe_allow_html=True)
 
-                # Export / Download Button
+                # Export / Download Button for Individual Report
                 report_markdown = f"# PlainSight Styling Report\n\n**Category:** {category}\n\n{analysis_text}"
                 st.download_button(
                     label="📥 Download Styling Report",
