@@ -236,37 +236,38 @@ if uploaded_file is not None:
                 time.sleep(1.2)
             loading_placeholder.empty()
 
-            # Live Gemini AI Analysis with automatic fallback/retries
+            # Live Gemini AI Analysis with Multi-Model Fallback
             response = None
             error_message = None
-            max_retries = 5
+            
+            # We will try gemini-3.8-flash first, then fallback to other stable tiers if needed
+            candidate_models = ['gemini-3.8-flash', 'gemini-1.5-flash', 'gemini-1.5-pro']
 
-            for attempt in range(max_retries):
+            client = genai.Client()
+            prompt = f"""
+            Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+            ### Strengths
+            ### Assessment
+            ### Refinements
+            Keep the content fully detailed, insightful, and professional.
+            """
+            image_part = types.Part.from_bytes(
+                data=uploaded_file.getvalue(),
+                mime_type=uploaded_file.type
+            )
+
+            for model_name in candidate_models:
                 try:
-                    client = genai.Client()
-                    prompt = f"""
-                    Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
-                    ### Strengths
-                    ### Assessment
-                    ### Refinements
-                    Keep the content fully detailed, insightful, and professional.
-                    """
-                    image_part = types.Part.from_bytes(
-                        data=uploaded_file.getvalue(),
-                        mime_type=uploaded_file.type
-                    )
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model=model_name,
                         contents=[prompt, image_part]
                     )
-                    break
+                    if response and hasattr(response, 'text'):
+                        break # Success! Exit fallback loop.
                 except Exception as e:
                     error_message = str(e)
-                    if "503" in error_message or "Unavailable" in error_message or "high demand" in error_message:
-                        time.sleep(3) # wait 3 seconds before trying again automatically
-                        continue
-                    else:
-                        break
+                    time.sleep(1)
+                    continue
 
             if response and hasattr(response, 'text'):
                 analysis_text = response.text
