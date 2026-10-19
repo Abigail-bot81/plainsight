@@ -10,15 +10,23 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS styling including card themes and complete indicator
+# Custom CSS styling with dark blue gradient background and light text
 st.markdown("""
 <style>
     .main {
-        background-color: #F8FAFC;
+        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+        background-attachment: fixed;
     }
     .stApp {
-        background-color: #F8FAFC;
+        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+        background-attachment: fixed;
     }
+    
+    /* Global text color adjustment for readability on dark background */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
+        color: #F8FAFC !important;
+    }
+
     .stButton>button {
         width: 100%;
         background-color: #2563EB;
@@ -35,8 +43,8 @@ st.markdown("""
 
     /* Custom Category Box Themes */
     .cat-casual {
-        background-color: #EEF2FF;
-        color: #4F46E5;
+        background-color: rgba(238, 242, 255, 0.9);
+        color: #4F46E5 !important;
         padding: 12px 16px;
         border-radius: 8px;
         font-weight: 600;
@@ -44,8 +52,8 @@ st.markdown("""
         border: 1px solid #C7D2FE;
     }
     .cat-business {
-        background-color: #E0F2FE;
-        color: #1E3A8A;
+        background-color: rgba(224, 242, 254, 0.9);
+        color: #1E3A8A !important;
         padding: 12px 16px;
         border-radius: 8px;
         font-weight: 600;
@@ -53,8 +61,8 @@ st.markdown("""
         border: 1px solid #BFDBFE;
     }
     .cat-evening {
-        background-color: #FEF3C7;
-        color: #581C87;
+        background-color: rgba(254, 243, 199, 0.9);
+        color: #581C87 !important;
         padding: 12px 16px;
         border-radius: 8px;
         font-weight: 600;
@@ -62,8 +70,8 @@ st.markdown("""
         border: 1px solid #FDE68A;
     }
     .cat-athleisure {
-        background-color: #FFEDD5;
-        color: #14532D;
+        background-color: rgba(255, 237, 213, 0.9);
+        color: #14532D !important;
         padding: 12px 16px;
         border-radius: 8px;
         font-weight: 600;
@@ -78,10 +86,10 @@ st.markdown("""
         border-radius: 12px;
         padding: 16px 20px;
         margin-bottom: 10px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .header-strengths {
-        color: #1E40AF;
+        color: #1E40AF !important;
         font-weight: 700;
         font-size: 1.1rem;
     }
@@ -93,10 +101,10 @@ st.markdown("""
         border-radius: 12px;
         padding: 16px 20px;
         margin-bottom: 10px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .header-assessment {
-        color: #713F12;
+        color: #713F12 !important;
         font-weight: 700;
         font-size: 1.1rem;
     }
@@ -108,10 +116,10 @@ st.markdown("""
         border-radius: 12px;
         padding: 16px 20px;
         margin-bottom: 10px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .header-refinements {
-        color: #14532D;
+        color: #14532D !important;
         font-weight: 700;
         font-size: 1.1rem;
     }
@@ -195,7 +203,7 @@ if uploaded_file is not None:
             ]
             for msg, icon in messages:
                 loading_placeholder.markdown(f"""
-                    <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.7); border-radius: 8px; margin-bottom: 15px;">
+                    <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
                         {msg} {icon}
                     </div>
                 """, unsafe_allow_html=True)
@@ -284,7 +292,7 @@ if uploaded_file is not None:
                 # Centered analysis complete message
                 st.markdown("""
                     <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-                        <div style="background-color: #E2E8F0; color: #334155; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                             Analysis complete.
                         </div>
                     </div>
