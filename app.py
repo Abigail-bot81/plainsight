@@ -236,12 +236,11 @@ if uploaded_file is not None:
                 time.sleep(1.2)
             loading_placeholder.empty()
 
-            # Live Gemini AI Analysis with clean fallback list
+            # Live Gemini AI Analysis with multi-model auto-fallback loop
             response = None
             error_message = None
             
-            # Use the verified active standard flash model
-            candidate_models = ['gemini-2.5-flash']
+            candidate_models = ['gemini-2.5-flash', 'gemini-1.5-flash']
 
             client = genai.Client()
             prompt = f"""
