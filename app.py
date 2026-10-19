@@ -135,8 +135,8 @@ with st.sidebar:
                 st.image(item["image"], use_container_width=True)
                 st.markdown(item["text"])
 
-# Display the custom PNG Logo Lockup
-st.image("PlainSight logo.png", width=350)
+# Display the custom PNG Logo Lockup (scaled down for better layout flow)
+st.image("PlainSight logo.png", width=200)
 
 st.write("Upload an outfit photograph to receive a structured styling breakdown.")
 st.markdown("---")
