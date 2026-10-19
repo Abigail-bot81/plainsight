@@ -240,7 +240,7 @@ if uploaded_file is not None:
             response = None
             error_message = None
             
-            candidate_models = ['gemini-2.5-flash', 'gemini-1.5-flash']
+            candidate_models = ['gemini-3.8-flash', 'gemini-3.6-flash']
 
             client = genai.Client()
             prompt = f"""
