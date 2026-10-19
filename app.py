@@ -11,8 +11,37 @@ st.set_page_config(
 )
 
 # Custom CSS styling with dark blue gradient background and light text
+# Custom CSS styling with dark blue gradient background and light text
 st.markdown("""
 <style>
+    .main {
+        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+        background-attachment: fixed;
+    }
+    .stApp {
+        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+        background-attachment: fixed;
+    }
+    
+    /* Style the sidebar background to match and force bright white text */
+    [data-testid="stSidebar"] {
+        background-color: #0F172A;
+    }
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, 
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] span, 
+    [data-testid="stSidebar"] label, 
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #F8FAFC !important;
+    }
+
+    /* Global text color adjustment for main app */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
+        color: #F8FAFC !important;
+    }
     .main {
         background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
         background-attachment: fixed;
