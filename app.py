@@ -5,14 +5,14 @@ from google.genai import types
 
 # Page Configuration
 st.set_page_config(
-    page_title="PlainSight", 
-    page_icon="🔍", 
+    page_title="PlainSight",
+    page_icon="🔍",
     layout="centered"
 )
 
-# Custom CSS styling including logo lockup, card themes, and complete indicator
+# Custom CSS styling including card themes and complete indicator
 st.markdown("""
-    <style>
+<style>
     .main {
         background-color: #F8FAFC;
     }
@@ -31,80 +31,6 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #1D4ED8;
         color: white;
-    }
-    
-    /* Logo & Brand Lockup Styling */
-    .logo-container {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 5px;
-        padding-top: 10px;
-    }
-    .scope-circle {
-        width: 75px;
-        height: 75px;
-        border: 4px solid #1E293B;
-        border-radius: 50%;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #FFFFFF;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    /* Crosshairs */
-    .scope-circle::before {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 2px;
-        background-color: #1E293B;
-    }
-    .scope-circle::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        height: 100%;
-        background-color: #1E293B;
-    }
-    .crosshair-center {
-        position: absolute;
-        font-weight: 900;
-        font-size: 1.2rem;
-        color: #2563EB;
-        z-index: 2;
-    }
-    .brand-title-group {
-        display: flex;
-        flex-direction: column;
-    }
-    .brand-name-row {
-        display: flex;
-        align-items: baseline;
-        gap: 12px;
-    }
-    .brand-ps {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #1E293B;
-        letter-spacing: -1px;
-        line-height: 1;
-    }
-    .brand-main {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1E293B;
-        letter-spacing: -0.5px;
-        line-height: 1;
-    }
-    .brand-slogan {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #64748B;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-top: 6px;
     }
 
     /* Custom Category Box Themes */
@@ -189,7 +115,7 @@ st.markdown("""
         font-weight: 700;
         font-size: 1.1rem;
     }
-    </style>
+</style>
 """, unsafe_allow_html=True)
 
 # Initialize Session State for History Log
@@ -200,6 +126,7 @@ if "history" not in st.session_state:
 with st.sidebar:
     st.header("📂 Outfit History Log")
     st.write("Review previous analyses from this session.")
+    
     if not st.session_state.history:
         st.info("No past analyses yet. Upload an outfit to start your log!")
     else:
@@ -208,24 +135,10 @@ with st.sidebar:
                 st.image(item["image"], use_container_width=True)
                 st.markdown(item["text"])
 
-# Custom Scope Logo & Header Lockup (Jacques's Concept)
-st.markdown("""
-    <div class="logo-container">
-        <div class="scope-circle">
-            <div class="crosshair-center">+</div>
-        </div>
-        <div class="brand-title-group">
-            <div class="brand-name-row">
-                <span class="brand-ps">PS</span>
-                <span class="brand-main">PlainSight</span>
-            </div>
-            <div class="brand-slogan">No filters</div>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+# Display the custom PNG Logo Lockup
+st.image("PlainSight logo.png", width=350)
 
 st.write("Upload an outfit photograph to receive a structured styling breakdown.")
-
 st.markdown("---")
 
 # Target Image Section
@@ -233,7 +146,7 @@ st.subheader("Target Image")
 
 # Category selection mapped to your custom styled themes
 category = st.selectbox(
-    "Select Outfit Category", 
+    "Select Outfit Category",
     ["Casual / Everyday", "Business / Formal", "Evening / Special Occasion", "Athleisure"]
 )
 
@@ -251,135 +164,125 @@ uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", 
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
+    st.markdown("---")
 
-st.markdown("---")
-
-# Analysis Section
-st.subheader("Analysis & Guidance")
-
-if st.button("Reveal the Truth"):
-    if uploaded_file is None:
-        st.warning("Please upload an outfit image first.")
-    else:
-        loading_placeholder = st.empty()
-        
-        # Rotating loading messages
-        messages = [
-            ("Looking and analysing...", "👔"),
-            ("Checking the vibe...", "✨"),
-            ("Putting it all together...", "🔍"),
-        ]
-        
-        for msg, icon in messages:
-            loading_placeholder.markdown(f"""
-                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.7); border-radius: 8px; margin-bottom: 15px;">
-                    {msg} {icon}
-                </div>
-            """, unsafe_allow_html=True)
-            time.sleep(1.2)
-            
-        loading_placeholder.empty()
-        
-        # Live Gemini AI Analysis
-        response = None
-        error_message = None
-        max_retries = 3
-        
-        for attempt in range(max_retries):
-            try:
-                client = genai.Client()
-                
-                prompt = f"""
-                Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
-                ### Strengths
-                ### Assessment
-                ### Refinements
-                
-                Keep the content fully detailed, insightful, and professional.
-                """
-                
-                image_part = types.Part.from_bytes(
-                    data=uploaded_file.getvalue(),
-                    mime_type=uploaded_file.type
-                )
-                
-                response = client.models.generate_content(
-                    model='gemini-3.8-flash',
-                    contents=[prompt, image_part]
-                )
-                break
-            except Exception as e:
-                error_message = str(e)
-                if "503" in error_message or "Unavailable" in error_message:
-                    time.sleep(2)
-                    continue
-                else:
-                    break
-
-        if response and hasattr(response, 'text'):
-            analysis_text = response.text
-            
-            # Save to Session History Log
-            current_time = time.strftime("%H:%M:%S")
-            st.session_state.history.append({
-                "category": category,
-                "time": current_time,
-                "image": uploaded_file.getvalue(),
-                "text": analysis_text
-            })
-            
-            st.markdown(f"### Findings ({category})")
-            
-            # Splitting and rendering the output into collapsible color-coded card expanders
-            chunks = analysis_text.split("###")
-            
-            for chunk in chunks:
-                if chunk.strip():
-                    lines = chunk.strip().split("\n", 1)
-                    title = lines[0].strip().replace("#", "").strip()
-                    body = lines[1].strip() if len(lines) > 1 else ""
-                    
-                    if title == "Strengths":
-                        with st.expander(f"✨ {title} (Click to expand/collapse)", expanded=True):
-                            st.markdown(f"""
-                                <div class="card-strengths">
-                                    <div class="header-strengths">{title}</div>
-                                </div>
-                            """, unsafe_allow_html=True)
-                            st.markdown(body)
-                    elif title == "Assessment":
-                        with st.expander(f"⭐ {title} (Click to expand/collapse)", expanded=True):
-                            st.markdown(f"""
-                                <div class="card-assessment">
-                                    <div class="header-assessment">{title}</div>
-                                </div>
-                            """, unsafe_allow_html=True)
-                            st.markdown(body)
-                    elif title == "Refinements":
-                        with st.expander(f"🎯 {title} (Click to expand/collapse)", expanded=True):
-                            st.markdown(f"""
-                                <div class="card-refinements">
-                                    <div class="header-refinements">{title}</div>
-                                </div>
-                            """, unsafe_allow_html=True)
-                            st.markdown(body)
-            
-            # Centered analysis complete message with a darker, distinct background pill
-            st.markdown("""
-                <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-                    <div style="background-color: #E2E8F0; color: #334155; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                        Analysis complete.
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Export / Download Button
-            report_markdown = f"# PlainSight Styling Report\n\n**Category:** {category}\n\n{analysis_text}"
-            st.download_button(
-                label="📥 Download Styling Report",
-                data=report_markdown,
-                file_name=f"plainsight_report_{category.lower().replace('/', '_').strip()}.md",
-                mime="text/markdown"
-            )
+    # Analysis Section
+    st.subheader("Analysis & Guidance")
+    
+    if st.button("Reveal the Truth"):
+        if uploaded_file is None:
+            st.warning("Please upload an outfit image first.")
         else:
-            st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
+            loading_placeholder = st.empty()
+            messages = [
+                ("Looking and analysing...", "👔"),
+                ("Checking the vibe...", "✨"),
+                ("Putting it all together...", "🔍"),
+            ]
+            for msg, icon in messages:
+                loading_placeholder.markdown(f"""
+                    <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.7); border-radius: 8px; margin-bottom: 15px;">
+                        {msg} {icon}
+                    </div>
+                """, unsafe_allow_html=True)
+                time.sleep(1.2)
+            loading_placeholder.empty()
+
+            # Live Gemini AI Analysis
+            response = None
+            error_message = None
+            max_retries = 3
+
+            for attempt in range(max_retries):
+                try:
+                    client = genai.Client()
+                    prompt = f"""
+                    Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+                    ### Strengths
+                    ### Assessment
+                    ### Refinements
+                    Keep the content fully detailed, insightful, and professional.
+                    """
+                    image_part = types.Part.from_bytes(
+                        data=uploaded_file.getvalue(),
+                        mime_type=uploaded_file.type
+                    )
+                    response = client.models.generate_content(
+                        model='gemini-2.5-flash',
+                        contents=[prompt, image_part]
+                    )
+                    break
+                except Exception as e:
+                    error_message = str(e)
+                    if "503" in error_message or "Unavailable" in error_message:
+                        time.sleep(2)
+                        continue
+                    else:
+                        break
+
+            if response and hasattr(response, 'text'):
+                analysis_text = response.text
+
+                # Save to Session History Log
+                current_time = time.strftime("%H:%M:%S")
+                st.session_state.history.append({
+                    "category": category,
+                    "time": current_time,
+                    "image": uploaded_file.getvalue(),
+                    "text": analysis_text
+                })
+
+                st.markdown(f"### Findings ({category})")
+
+                # Splitting and rendering the output into collapsible color-coded card expanders
+                chunks = analysis_text.split("###")
+                for chunk in chunks:
+                    if chunk.strip():
+                        lines = chunk.strip().split("\n", 1)
+                        title = lines[0].strip().replace("#", "").strip()
+                        body = lines[1].strip() if len(lines) > 1 else ""
+
+                        if title == "Strengths":
+                            with st.expander(f"✨ {title} (Click to expand/collapse)", expanded=True):
+                                st.markdown(f"""
+                                    <div class="card-strengths">
+                                        <div class="header-strengths">{title}</div>
+                                    </div>
+                                """, unsafe_allow_html=True)
+                                st.markdown(body)
+                        elif title == "Assessment":
+                            with st.expander(f"⭐ {title} (Click to expand/collapse)", expanded=True):
+                                st.markdown(f"""
+                                    <div class="card-assessment">
+                                        <div class="header-assessment">{title}</div>
+                                    </div>
+                                """, unsafe_allow_html=True)
+                                st.markdown(body)
+                        elif title == "Refinements":
+                            with st.expander(f"🎯 {title} (Click to expand/collapse)", expanded=True):
+                                st.markdown(f"""
+                                    <div class="card-refinements">
+                                        <div class="header-refinements">{title}</div>
+                                    </div>
+                                """, unsafe_allow_html=True)
+                                st.markdown(body)
+
+                # Centered analysis complete message
+                st.markdown("""
+                    <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+                        <div style="background-color: #E2E8F0; color: #334155; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            Analysis complete.
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+                # Export / Download Button
+                report_markdown = f"# PlainSight Styling Report\n\n**Category:** {category}\n\n{analysis_text}"
+                st.download_button(
+                    label="📥 Download Styling Report",
+                    data=report_markdown,
+                    file_name=f"plainsight_report_{category.lower().replace('/', '_').strip()}.md",
+                    mime="text/markdown"
+                )
+            else:
+                st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
