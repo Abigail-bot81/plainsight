@@ -236,12 +236,12 @@ if uploaded_file is not None:
                 time.sleep(1.2)
             loading_placeholder.empty()
 
-            # Live Gemini AI Analysis with Multi-Model Fallback
+            # Live Gemini AI Analysis with clean fallback list
             response = None
             error_message = None
             
-            # We will try gemini-3.8-flash first, then fallback to other stable tiers if needed
-            candidate_models = ['gemini-3.8-flash', 'gemini-1.5-flash', 'gemini-1.5-pro']
+            # Use the verified active standard flash model
+            candidate_models = ['gemini-2.5-flash']
 
             client = genai.Client()
             prompt = f"""
@@ -263,7 +263,7 @@ if uploaded_file is not None:
                         contents=[prompt, image_part]
                     )
                     if response and hasattr(response, 'text'):
-                        break # Success! Exit fallback loop.
+                        break
                 except Exception as e:
                     error_message = str(e)
                     time.sleep(1)
@@ -334,4 +334,4 @@ if uploaded_file is not None:
                     mime="text/markdown"
                 )
             else:
-                st.error(f"The server is experiencing high traffic right now. Please try clicking 'Reveal the Truth' again in a moment. (Details: {error_message})")
+                st.error(f"Unable to connect to the model endpoint. (Details: {error_message})")
