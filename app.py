@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from google import genai
 from google.genai import types
@@ -26,8 +27,15 @@ st.markdown("""
         color: #F8FAFC !important;
     }
 
-    /* Force all sidebar text and content to be bright white */
-    [data-testid="stSidebar"], [data-testid="stSidebarContent"], [data-testid="stSidebarContent"] * {
+    /* Force all text inside the sidebar to be bright white */
+    section[data-testid="stSidebar"] h1, 
+    section[data-testid="stSidebar"] h2, 
+    section[data-testid="stSidebar"] h3, 
+    section[data-testid="stSidebar"] p, 
+    section[data-testid="stSidebar"] span, 
+    section[data-testid="stSidebar"] label, 
+    section[data-testid="stSidebar"] div,
+    section[data-testid="stSidebar"] .stMarkdown {
         color: #F8FAFC !important;
     }
 
