@@ -207,8 +207,8 @@ elif category == "Evening / Special Occasion":
 else:
     st.markdown('<div class="cat-athleisure">⚡ Active Category: Athleisure</div>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Choose an outfit image", type=["jpg", "jpeg", "png"])
-
+st.markdown('<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose an outfit image</p>', unsafe_allow_html=True)
+uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
     st.markdown("---")
