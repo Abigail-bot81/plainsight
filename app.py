@@ -256,7 +256,7 @@ if uploaded_file is not None:
                         mime_type=uploaded_file.type
                     )
                     response = client.models.generate_content(
-                        model='gemini-flash-latest',
+                        model='gemini-2.5-flash',
                         contents=[prompt, image_part]
                     )
                     break
