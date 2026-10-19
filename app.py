@@ -42,12 +42,14 @@ st.markdown("""
         color: #F8FAFC !important;
     }
 
-    /* Fix file uploader text so it stays dark and readable */
-    [data-testid="stFileUploader"] section, 
+    /* Force file uploader text and instructions to be dark and high-contrast */
+    [data-testid="stFileUploader"] *, 
     [data-testid="stFileUploader"] span, 
-    [data-testid="stFileUploader"] small,
-    [data-testid="stFileUploader"] div {
-        color: #1E293B !important;
+    [data-testid="stFileUploader"] small, 
+    [data-testid="stFileUploader"] div, 
+    [data-testid="stFileUploader"] label {
+        color: #0F172A !important;
+        font-weight: 600 !important;
     }
 
     .stButton>button {
