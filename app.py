@@ -1,108 +1,144 @@
-from PIL import Image
 import streamlit as st
 
 # ==========================================
-# 1. PAGE CONFIGURATION
+# 1. PAGE CONFIGURATION & SETUP
 # ==========================================
 st.set_page_config(
-    page_title="PlainSight", page_icon="✨", layout="centered"
+    page_title="PlainSight - AI Styling Assistant",
+    page_icon="✨",
+    layout="centered",
+    initial_sidebar_state="expanded",
 )
 
-# ==========================================
-# 2. IMAGE OPTIMIZATION FOR SPEED
-# ==========================================
-
-
-def optimize_uploaded_image(uploaded_file):
-  """Opens an uploaded image, resizes it if it's too large,
-
-  and returns it optimized for fast AI processing.
-  """
-  img = Image.open(uploaded_file)
-
-  # Convert to RGB if it's in RGBA (PNG transparency) to avoid color errors
-  if img.mode in ("RGBA", "P"):
-    img = img.convert("RGB")
-
-  # Set a max width/height to keep processing lightning fast (800px)
-  max_size = (800, 800)
-  img.thumbnail(max_size, Image.Resampling.LANCZOS)
-
-  return img
-
+# Custom Styling & CSS Polish
+st.markdown("""
+    <style>
+    .main {
+        padding: 2rem;
+    }
+    .stButton>button {
+        width: 100%;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    .uploadedFile {
+        border-radius: 8px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # ==========================================
-# 3. APP HEADER & LAYOUT
+# 2. APP HEADER & NAVIGATION
 # ==========================================
 st.title("✨ PlainSight")
 st.write(
-    "Upload an outfit photograph to receive a structured styling breakdown"
-    " instantly."
+    "Upload an outfit photograph to receive an instant, structured styling"
+    " breakdown and professional fashion assessment."
 )
 
-# Sidebar / Category selection
-st.sidebar.header("Settings")
+# Sidebar / Category selection & Preferences
+st.sidebar.header("Styling Settings")
 category = st.sidebar.selectbox(
-    "Select Outfit Category", ["Casual / Everyday", "Work / Business", "Formal"]
+    "Select Outfit Category",
+    [
+        "Casual / Everyday",
+        "Work / Business Professional",
+        "Formal / Evening",
+        "Athleisure / Active",
+    ],
+)
+
+style_vibe = st.sidebar.selectbox(
+    "Preferred Tone", ["Constructive & Direct", "Encouraging & Chic", "Editorial"]
+)
+
+st.sidebar.divider()
+st.sidebar.info(
+    "💡 **Tip:** Ensure your photo has good natural lighting for the most"
+    " accurate color and fit breakdown."
 )
 
 st.divider()
 
 # ==========================================
-# 4. FILE UPLOAD & PROCESSING
+# 3. FILE UPLOAD & PROCESSING ENGINE
 # ==========================================
 uploaded_file = st.file_uploader(
     "Choose an outfit image", type=["jpg", "png", "jpeg"]
 )
 
 if uploaded_file is not None:
-  # Display original preview or process immediately
-  st.image(
-      uploaded_file, caption="Selected Outfit", use_container_width=True
+  # Container for visual preview
+  col1, col2, col3 = st.columns([1, 6, 1])
+  with col2:
+    st.image(
+        uploaded_file, caption="Selected Outfit Preview", use_container_width=True
+    )
+
+  st.write("")
+  st.write(
+      f"**Active Category:** `{category}` | **Analysis Mode:** `{style_vibe}`"
   )
 
-  # Optimize the image for speed behind the scenes
-  processed_image = optimize_uploaded_image(uploaded_file)
-
-  st.write(f"**Active Category:** {category}")
-
+  # Main Action Button
   if st.button("Reveal the Truth", type="primary"):
-    with st.spinner("Analyzing outfit with lightning speed..."):
+    with st.spinner("Analyzing outfit..."):
       # --- PLACEHOLDER FOR YOUR AI/GEMINI VISION CALL ---
-      # Replace 'processed_image' in your API call below:
-      # response = model.generate_content([processed_image, "Analyze this outfit..."])
+      # response = model.generate_content([uploaded_file, f"Analyze this outfit for {category} with a {style_vibe} tone."])
 
-      # Simulated rapid analysis output
+      # Structured Display Blocks
       st.success("Analysis complete!")
 
-      st.subheader(f"Findings ({category})")
+      st.markdown("### 📊 Comprehensive Style Breakdown")
 
-      with st.expander("✨ Strengths", expanded=True):
+      # Expander 1: Strengths
+      with st.expander("✨ Core Strengths & Highlights", expanded=True):
         st.markdown("""
-                - **Timeless Color Coordination:** Utilizes a clean, harmonious palette.
-                - **Flattering Proportions:** Balanced silhouette that highlights ease of wear.
-                - **Effortless Practicality:** Meets modern everyday functionality.
+                - **Color Harmony:** The palette complements underlying tone selections effectively without visual friction.
+                - **Silhouette & Balance:** Proportions are well-managed, creating an approachable and structured look.
+                - **Contextual Fit:** Aligns neatly with expectations for the selected category.
                 """)
 
-      with st.expander("⭐ Assessment", expanded=True):
+      # Expander 2: Detailed Assessment
+      with st.expander("⭐ Detailed Aesthetic Assessment", expanded=True):
         st.write(
-            "The outfit successfully delivers a solid foundational aesthetic."
-            " With minor tweaks, it can transition seamlessly to high-impact"
-            " style."
+            "The outfit delivers a strong foundational aesthetic. The garment"
+            " pairings establish a clear visual narrative, though minor"
+            " adjustments in layering or accessory placement can elevate the"
+            " overall impact from standard to statement-level."
         )
 
-      with st.expander("🎯 Refinements", expanded=True):
+      # Expander 3: Actionable Refinements
+      with st.expander("🎯 Actionable Refinements", expanded=True):
         st.markdown("""
-                - **Define the Waistline:** Apply a subtle tuck to anchor proportions.
-                - **Add a Third Piece:** Introduce layering for added texture.
+                - **Anchor the Proportions:** Consider a subtle tuck or structured belt line to accentuate height.
+                - **Introduce Textural Contrast:** Pairing smooth fabrics with a textured layer (like knitwear or tailored outerwear) adds depth.
+                - **Accessory Focus:** Keep metal accents unified (all gold or all silver) to maintain a cohesive finish.
                 """)
 
-      # Download report button placeholder
+      st.divider()
+
+      # Download Report Section
+      report_text = (
+          f"PLAIN-SIGHT STYLE REPORT\nCategory: {category}\nTone:"
+          f" {style_vibe}\n\nStatus: Complete and Analyzed."
+      )
       st.download_button(
-          label="📥 Download Styling Report",
-          data="PlainSight Style Report Content",
-          file_name="plainsight_report.txt",
+          label="📥 Download Full Styling Report",
+          data=report_text,
+          file_name="plainsight_styling_report.txt",
           mime="text/plain",
       )
 else:
-  st.info("Please upload an image above to start your styling analysis.")
+  # Empty state banner
+  st.info(
+      "👆 Please upload an image above to start your instant styling analysis."
+  )
+
+  # Quick feature breakdown for first-time visitors
+  with st.expander("How PlainSight Works"):
+    st.markdown("""
+        1. **Upload:** Drop your outfit picture above (JPEG or PNG).
+        2. **Configure:** Pick your category and preferred feedback tone in the sidebar.
+        3. **Reveal:** Hit **Reveal the Truth** to instantly get structured feedback on strengths, assessments, and actionable refinements.
+        """)
