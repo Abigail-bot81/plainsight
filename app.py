@@ -244,7 +244,7 @@ else:
   )
 
 st.markdown(
-    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose"
+    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose'
     " an outfit image</p>",
     unsafe_allow_html=True,
 )
