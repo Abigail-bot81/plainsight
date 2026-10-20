@@ -1,4 +1,3 @@
-Python
 import timeimport streamlit as stfrom google import genaifrom google.genai import types
 # Page Configuration
 st.set_page_config(
