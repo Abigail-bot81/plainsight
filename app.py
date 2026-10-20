@@ -158,10 +158,10 @@ def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
     img = img.convert("RGB")
-  max_size = (800, 800)
+  max_size = (600, 600)
   img.thumbnail(max_size, Image.Resampling.LANCZOS)
   buffered = BytesIO()
-  img.save(buffered, format="JPEG", quality=85)
+  img.save(buffered, format="JPEG", quality=80)
   return buffered.getvalue()
 
 
@@ -177,7 +177,6 @@ with st.sidebar:
   if not st.session_state.history:
     st.info("No past analyses yet. Upload an outfit to start your log!")
   else:
-    # Button to export all session history combined into one document
     session_export_markdown = "# PlainSight - Complete Session Styling Report\n\n"
     for item in st.session_state.history:
       session_export_markdown += (
@@ -212,7 +211,6 @@ st.markdown("---")
 # Target Image Section
 st.subheader("Target Image")
 
-# Category selection mapped to your custom styled themes
 category = st.selectbox(
     "Select Outfit Category",
     [
@@ -223,7 +221,6 @@ category = st.selectbox(
     ],
 )
 
-# Render the active category box with your exact custom colors
 if category == "Casual / Everyday":
   st.markdown(
       '<div class="cat-casual">✨ Active Category: Casual / Everyday</div>',
@@ -259,68 +256,39 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  # Analysis Section
   st.subheader("Analysis & Guidance")
 
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      loading_placeholder = st.empty()
-      messages = [
-          ("Looking and analysing...", "👔"),
-          ("Checking the vibe...", "✨"),
-          ("Putting it all together...", "🔍"),
-      ]
-      for msg, icon in messages:
-        loading_placeholder.markdown(
-            f"""
-                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
-                    {msg} {icon}
-                </div>
-            """,
-            unsafe_allow_html=True,
+      # Quick spinner for instant feedback
+      with st.spinner("Analyzing outfit..."):
+        client = genai.Client()
+        prompt = f"""
+                Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+                ### Strengths
+                ### Assessment
+                ### Refinements
+                Keep the content fully detailed, insightful, and professional.
+                """
+
+        optimized_image_bytes = optimize_uploaded_image(uploaded_file)
+        image_part = types.Part.from_bytes(
+            data=optimized_image_bytes, mime_type="image/jpeg"
         )
-        time.sleep(0.4)
-      loading_placeholder.empty()
 
-      # Live Gemini AI Analysis with multi-model auto-fallback loop
-      response = None
-      error_message = None
-
-      candidate_models = ["gemini-3.8-flash", "gemini-3.6-flash"]
-
-      client = genai.Client()
-      prompt = f"""
-            Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
-            ### Strengths
-            ### Assessment
-            ### Refinements
-            Keep the content fully detailed, insightful, and professional.
-            """
-
-      # Optimize image for speed before sending to API
-      optimized_image_bytes = optimize_uploaded_image(uploaded_file)
-      image_part = types.Part.from_bytes(
-          data=optimized_image_bytes, mime_type="image/jpeg"
-      )
-
-      for model_name in candidate_models:
         try:
           response = client.models.generate_content(
-              model=model_name, contents=[prompt, image_part]
+              model="gemini-2.5-flash", contents=[prompt, image_part]
           )
-          if response and hasattr(response, "text"):
-            break
         except Exception as e:
+          response = None
           error_message = str(e)
-          time.sleep(1)
-          continue
 
       if response and hasattr(response, "text"):
         analysis_text = response.text
 
-        # Save to Session History Log
         current_time = time.strftime("%H:%M:%S")
         st.session_state.history.append({
             "category": category,
@@ -331,7 +299,6 @@ if uploaded_file is not None:
 
         st.markdown(f"### Findings ({category})")
 
-        # Splitting and rendering the output into collapsible color-coded card expanders
         chunks = analysis_text.split("###")
         for chunk in chunks:
           if chunk.strip():
@@ -379,7 +346,6 @@ if uploaded_file is not None:
                 )
                 st.markdown(body)
 
-        # Centered analysis complete message
         st.markdown(
             """
                 <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
@@ -391,7 +357,6 @@ if uploaded_file is not None:
             unsafe_allow_html=True,
         )
 
-        # Export / Download Button for Individual Report
         report_markdown = (
             f"# PlainSight Styling Report\n\n**Category:**"
             f" {category}\n\n{analysis_text}"
