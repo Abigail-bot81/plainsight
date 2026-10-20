@@ -279,17 +279,20 @@ if uploaded_file is not None:
 
         response = None
         error_message = ""
-        # Automatic retry loop to handle temporary high-demand spikes smoothly
-        for attempt in range(3):
+        # Using gemini-3.8-flash with a backup fallback to ensure no 503 errors block your clients
+        candidate_models = ["gemini-3.8-flash", "gemini-flash-latest"]
+
+        for model_name in candidate_models:
           try:
             response = client.models.generate_content(
-                model="gemini-3.8-flash", contents=[prompt, image_part]
+                model=model_name, contents=[prompt, image_part]
             )
             if response and hasattr(response, "text"):
               break
           except Exception as e:
             error_message = str(e)
-            time.sleep(1.5)
+            time.sleep(1)
+            continue
 
       if response and hasattr(response, "text"):
         analysis_text = response.text
