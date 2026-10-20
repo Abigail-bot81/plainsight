@@ -289,18 +289,34 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
-    # Using gemini-flash-latest as the reliable, high-availability model
-    try:
-      config = types.GenerateContentConfig(max_output_tokens=600, temperature=0.4)
-      response_stream = client.models.generate_content_stream(
-          model="gemini-flash-latest", contents=[prompt, image_part], config=config
-      )
-      for chunk in response_stream:
-        if hasattr(chunk, "text") and chunk.text:
-          analysis_text += chunk.text
-          live_placeholder.markdown(analysis_text)
-    except Exception as e:
-      error_message = str(e)
+    # Multi-model fallback sequence to instantly bypass 503 spikes
+    candidate_models = [
+        "gemini-3.8-flash",
+        "gemini-flash-latest",
+        "gemini-2.0-flash",
+    ]
+
+    for model_name in candidate_models:
+      try:
+        config = types.GenerateContentConfig(
+            max_output_tokens=600, temperature=0.4
+        )
+        response_stream = client.models.generate_content_stream(
+            model=model_name, contents=[prompt, image_part], config=config
+        )
+        temp_text = ""
+        for chunk in response_stream:
+          if hasattr(chunk, "text") and chunk.text:
+            temp_text += chunk.text
+            live_placeholder.markdown(temp_text)
+
+        if temp_text:
+          analysis_text = temp_text
+          break  # Success! Exit loop
+      except Exception as e:
+        error_message = str(e)
+        time.sleep(0.5)
+        continue
 
     if analysis_text:
       # Save to Session History Log
@@ -389,8 +405,7 @@ if uploaded_file is not None:
       # Reset trigger so it doesn't loop unintentionally on next interaction
       st.session_state.run_analysis = False
     else:
-      if error_message:
-        st.error(
-            "Unable to connect to the model endpoint. (Details:"
-            f" {error_message})"
-        )
+      st.error(
+          "Unable to connect to the model endpoint due to high traffic."
+          f" (Details: {error_message})"
+      )
