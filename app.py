@@ -153,15 +153,15 @@ st.markdown(
 )
 
 
-# Helper function to hyper-optimize image for fast AI processing
+# Helper function to hyper-optimize image for instant processing
 def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
     img = img.convert("RGB")
-  max_size = (400, 400)
+  max_size = (350, 350)
   img.thumbnail(max_size, Image.Resampling.LANCZOS)
   buffered = BytesIO()
-  img.save(buffered, format="JPEG", quality=75)
+  img.save(buffered, format="JPEG", quality=70)
   return buffered.getvalue()
 
 
@@ -244,7 +244,7 @@ else:
   )
 
 st.markdown(
-    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose'
+    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose"
     " an outfit image</p>",
     unsafe_allow_html=True,
 )
@@ -256,38 +256,23 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  # Analysis Section Header & Button (Correct Order)
+  # Analysis Section Header & Button
   st.subheader("Analysis & Guidance")
 
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      loading_placeholder = st.empty()
-      messages = [
-          ("Looking and analysing...", "👔"),
-          ("Checking the vibe...", "✨"),
-          ("Putting it all together...", "🔍"),
-      ]
-      for msg, icon in messages:
-        loading_placeholder.markdown(
-            f"""
-                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
-                    {msg} {icon}
-                </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        time.sleep(0.4)
-      loading_placeholder.empty()
+      st.markdown(f"### Findings ({category})")
+      live_placeholder = st.empty()
 
       client = genai.Client()
       prompt = f"""
-            Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+            Analyze this outfit for '{category}'. Provide feedback using exactly these headers:
             ### Strengths
             ### Assessment
             ### Refinements
-            Keep the content detailed, insightful, and professional.
+            Keep it professional and sharp.
             """
 
       optimized_image_bytes = optimize_uploaded_image(uploaded_file)
@@ -295,22 +280,22 @@ if uploaded_file is not None:
           data=optimized_image_bytes, mime_type="image/jpeg"
       )
 
-      response = None
+      analysis_text = ""
       error_message = ""
-      for attempt in range(3):
-        try:
-          response = client.models.generate_content(
-              model="gemini-3.8-flash", contents=[prompt, image_part]
-          )
-          if response and hasattr(response, "text"):
-            break
-        except Exception as e:
-          error_message = str(e)
-          time.sleep(1)
 
-      if response and hasattr(response, "text"):
-        analysis_text = response.text
+      # Stream the text live so clients see results instantly without waiting
+      try:
+        response_stream = client.models.generate_content_stream(
+            model="gemini-3.8-flash", contents=[prompt, image_part]
+        )
+        for chunk in response_stream:
+          if hasattr(chunk, "text") and chunk.text:
+            analysis_text += chunk.text
+            live_placeholder.markdown(analysis_text)
+      except Exception as e:
+        error_message = str(e)
 
+      if analysis_text:
         # Save to Session History Log
         current_time = time.strftime("%H:%M:%S")
         st.session_state.history.append({
@@ -320,9 +305,8 @@ if uploaded_file is not None:
             "text": analysis_text,
         })
 
-        st.markdown(f"### Findings ({category})")
-
-        # Splitting and rendering output into the proper color-coded card expanders
+        # Clear raw streaming text and render your gorgeous styled card expanders
+        live_placeholder.empty()
         chunks = analysis_text.split("###")
         for chunk in chunks:
           if chunk.strip():
