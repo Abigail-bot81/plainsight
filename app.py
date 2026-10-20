@@ -153,7 +153,7 @@ st.markdown(
 )
 
 
-# Helper function to hyper-optimize image for instant processing
+# Helper function to hyper-optimize image for instant AI processing
 def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
@@ -263,6 +263,7 @@ if uploaded_file is not None:
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
+      # Render header and placeholder ONLY after the button is clicked
       st.markdown(f"### Findings ({category})")
       live_placeholder = st.empty()
 
@@ -272,7 +273,7 @@ if uploaded_file is not None:
             ### Strengths
             ### Assessment
             ### Refinements
-            Keep it professional and sharp.
+            Keep it concise, professional, and sharp.
             """
 
       optimized_image_bytes = optimize_uploaded_image(uploaded_file)
@@ -283,10 +284,13 @@ if uploaded_file is not None:
       analysis_text = ""
       error_message = ""
 
-      # Stream the text live so clients see results instantly without waiting
+      # Stream text immediately with token limits for instant speed
       try:
+        config = types.GenerateContentConfig(
+            max_output_tokens=600, temperature=0.4
+        )
         response_stream = client.models.generate_content_stream(
-            model="gemini-3.8-flash", contents=[prompt, image_part]
+            model="gemini-3.8-flash", contents=[prompt, image_part], config=config
         )
         for chunk in response_stream:
           if hasattr(chunk, "text") and chunk.text:
@@ -305,7 +309,7 @@ if uploaded_file is not None:
             "text": analysis_text,
         })
 
-        # Clear raw streaming text and render your gorgeous styled card expanders
+        # Clear raw streaming text and render styled card expanders
         live_placeholder.empty()
         chunks = analysis_text.split("###")
         for chunk in chunks:
