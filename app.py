@@ -153,15 +153,15 @@ st.markdown(
 )
 
 
-# Helper function to optimize image for lightning-fast AI processing
+# Helper function to hyper-optimize image for instant AI processing
 def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
     img = img.convert("RGB")
-  max_size = (600, 600)
+  max_size = (400, 400)
   img.thumbnail(max_size, Image.Resampling.LANCZOS)
   buffered = BytesIO()
-  img.save(buffered, format="JPEG", quality=80)
+  img.save(buffered, format="JPEG", quality=75)
   return buffered.getvalue()
 
 
@@ -262,38 +262,40 @@ if uploaded_file is not None:
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      with st.spinner("Analyzing outfit..."):
-        client = genai.Client()
-        prompt = f"""
-                Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
-                ### Strengths
-                ### Assessment
-                ### Refinements
-                Keep the content fully detailed, insightful, and professional.
-                """
+      st.markdown(f"### Findings ({category})")
+      output_placeholder = st.empty()
 
-        optimized_image_bytes = optimize_uploaded_image(uploaded_file)
-        image_part = types.Part.from_bytes(
-            data=optimized_image_bytes, mime_type="image/jpeg"
+      client = genai.Client()
+      prompt = f"""
+            Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+            ### Strengths
+            ### Assessment
+            ### Refinements
+            Keep the content detailed, insightful, and professional.
+            """
+
+      optimized_image_bytes = optimize_uploaded_image(uploaded_file)
+      image_part = types.Part.from_bytes(
+          data=optimized_image_bytes, mime_type="image/jpeg"
+      )
+
+      analysis_text = ""
+      error_message = ""
+
+      # Stream the response live so text appears instantly
+      try:
+        response_stream = client.models.generate_content_stream(
+            model="gemini-3.8-flash", contents=[prompt, image_part]
         )
+        for chunk in response_stream:
+          if hasattr(chunk, "text") and chunk.text:
+            analysis_text += chunk.text
+            output_placeholder.markdown(analysis_text)
+      except Exception as e:
+        error_message = str(e)
 
-        response = None
-        error_message = ""
-        # Strictly using gemini-3.8-flash with automatic retry attempts for traffic spikes
-        for attempt in range(3):
-          try:
-            response = client.models.generate_content(
-                model="gemini-3.8-flash", contents=[prompt, image_part]
-            )
-            if response and hasattr(response, "text"):
-              break
-          except Exception as e:
-            error_message = str(e)
-            time.sleep(1.5)
-
-      if response and hasattr(response, "text"):
-        analysis_text = response.text
-
+      if analysis_text:
+        # Save to Session History Log
         current_time = time.strftime("%H:%M:%S")
         st.session_state.history.append({
             "category": category,
@@ -302,8 +304,8 @@ if uploaded_file is not None:
             "text": analysis_text,
         })
 
-        st.markdown(f"### Findings ({category})")
-
+        # Render final formatted card expanders once streaming finishes
+        output_placeholder.empty()
         chunks = analysis_text.split("###")
         for chunk in chunks:
           if chunk.strip():
