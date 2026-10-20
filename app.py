@@ -1,3 +1,5 @@
+from io import BytesIO
+from PIL import Image
 import time
 from google import genai
 from google.genai import types
@@ -150,6 +152,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+# Helper function to optimize image for lightning-fast AI processing
+def optimize_uploaded_image(uploaded_file):
+  img = Image.open(uploaded_file)
+  if img.mode in ("RGBA", "P"):
+    img = img.convert("RGB")
+  max_size = (800, 800)
+  img.thumbnail(max_size, Image.Resampling.LANCZOS)
+  buffered = BytesIO()
+  img.save(buffered, format="JPEG", quality=85)
+  return buffered.getvalue()
+
+
 # Initialize Session State for History Log
 if "history" not in st.session_state:
   st.session_state.history = []
@@ -266,7 +281,7 @@ if uploaded_file is not None:
             """,
             unsafe_allow_html=True,
         )
-        time.sleep(1.2)
+        time.sleep(0.4)
       loading_placeholder.empty()
 
       # Live Gemini AI Analysis with multi-model auto-fallback loop
@@ -283,8 +298,11 @@ if uploaded_file is not None:
             ### Refinements
             Keep the content fully detailed, insightful, and professional.
             """
+
+      # Optimize image for speed before sending to API
+      optimized_image_bytes = optimize_uploaded_image(uploaded_file)
       image_part = types.Part.from_bytes(
-          data=uploaded_file.getvalue(), mime_type=uploaded_file.type
+          data=optimized_image_bytes, mime_type="image/jpeg"
       )
 
       for model_name in candidate_models:
