@@ -153,7 +153,7 @@ st.markdown(
 )
 
 
-# Helper function to hyper-optimize image for instant AI processing
+# Helper function to hyper-optimize image for fast AI processing
 def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
@@ -256,14 +256,30 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
+  # Analysis Section Header & Button (Correct Order)
   st.subheader("Analysis & Guidance")
 
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      st.markdown(f"### Findings ({category})")
-      output_placeholder = st.empty()
+      loading_placeholder = st.empty()
+      messages = [
+          ("Looking and analysing...", "👔"),
+          ("Checking the vibe...", "✨"),
+          ("Putting it all together...", "🔍"),
+      ]
+      for msg, icon in messages:
+        loading_placeholder.markdown(
+            f"""
+                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
+                    {msg} {icon}
+                </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        time.sleep(0.4)
+      loading_placeholder.empty()
 
       client = genai.Client()
       prompt = f"""
@@ -279,22 +295,22 @@ if uploaded_file is not None:
           data=optimized_image_bytes, mime_type="image/jpeg"
       )
 
-      analysis_text = ""
+      response = None
       error_message = ""
+      for attempt in range(3):
+        try:
+          response = client.models.generate_content(
+              model="gemini-3.8-flash", contents=[prompt, image_part]
+          )
+          if response and hasattr(response, "text"):
+            break
+        except Exception as e:
+          error_message = str(e)
+          time.sleep(1)
 
-      # Stream the response live so text appears instantly
-      try:
-        response_stream = client.models.generate_content_stream(
-            model="gemini-3.8-flash", contents=[prompt, image_part]
-        )
-        for chunk in response_stream:
-          if hasattr(chunk, "text") and chunk.text:
-            analysis_text += chunk.text
-            output_placeholder.markdown(analysis_text)
-      except Exception as e:
-        error_message = str(e)
+      if response and hasattr(response, "text"):
+        analysis_text = response.text
 
-      if analysis_text:
         # Save to Session History Log
         current_time = time.strftime("%H:%M:%S")
         st.session_state.history.append({
@@ -304,8 +320,9 @@ if uploaded_file is not None:
             "text": analysis_text,
         })
 
-        # Render final formatted card expanders once streaming finishes
-        output_placeholder.empty()
+        st.markdown(f"### Findings ({category})")
+
+        # Splitting and rendering output into the proper color-coded card expanders
         chunks = analysis_text.split("###")
         for chunk in chunks:
           if chunk.strip():
