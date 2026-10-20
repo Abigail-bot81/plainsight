@@ -289,10 +289,11 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
+    # Using gemini-flash-latest as the reliable, high-availability model
     try:
       config = types.GenerateContentConfig(max_output_tokens=600, temperature=0.4)
       response_stream = client.models.generate_content_stream(
-          model="gemini-3.8-flash", contents=[prompt, image_part], config=config
+          model="gemini-flash-latest", contents=[prompt, image_part], config=config
       )
       for chunk in response_stream:
         if hasattr(chunk, "text") and chunk.text:
