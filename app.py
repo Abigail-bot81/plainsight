@@ -1,12 +1,14 @@
-import timeimport streamlit as stfrom google import genaifrom google.genai import types
+import time
+from google import genai
+from google.genai import types
+import streamlit as st
+
 # Page Configuration
-st.set_page_config(
-    page_title="PlainSight",
-    page_icon="🔍",
-    layout="centered"
-)
+st.set_page_config(page_title="PlainSight", page_icon="🔍", layout="centered")
+
 # Custom CSS styling with dark blue gradient background and light text
-st.markdown("""
+st.markdown(
+    """
 <style>
     .main {
         background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
@@ -144,175 +146,249 @@ st.markdown("""
         font-size: 1.1rem;
     }
 </style>
-""", unsafe_allow_html=True)
-# Initialize Session State for History Logif "history" not in st.session_state:
-    st.session_state.history = []
-# Sidebar for Outfit History Log & Session Exportwith st.sidebar:
-    st.header("📂 Outfit History Log")
-    st.write("Review previous analyses from this session.")
-    
-    if not st.session_state.history:
-        st.info("No past analyses yet. Upload an outfit to start your log!")
-    else:
-        # Button to export all session history combined into one document
-        session_export_markdown = "# PlainSight - Complete Session Styling Report\n\n"
-        for item in st.session_state.history:
-            session_export_markdown += f"## Category: {item['category']} (Time: {item['time']})\n\n{item['text']}\n\n---\n\n"
-            
-        st.download_button(
-            label="📥 Download Session Report",
-            data=session_export_markdown,
-            file_name="plainsight_complete_session_report.md",
-            mime="text/markdown",
-            use_container_width=True
-        )
-        st.markdown("---")
+""",
+    unsafe_allow_html=True,
+)
 
-        for idx, item in enumerate(reversed(st.session_state.history)):
-            with st.expander(f"{item['category']} ({item['time']})"):
-                st.image(item["image"], use_container_width=True)
-                st.markdown(item["text"])
+# Initialize Session State for History Log
+if "history" not in st.session_state:
+  st.session_state.history = []
+
+# Sidebar for Outfit History Log & Session Export
+with st.sidebar:
+  st.header("📂 Outfit History Log")
+  st.write("Review previous analyses from this session.")
+
+  if not st.session_state.history:
+    st.info("No past analyses yet. Upload an outfit to start your log!")
+  else:
+    # Button to export all session history combined into one document
+    session_export_markdown = "# PlainSight - Complete Session Styling Report\n\n"
+    for item in st.session_state.history:
+      session_export_markdown += (
+          f"## Category: {item['category']} (Time: {item['time']})\n\n"
+          f"{item['text']}\n\n---\n\n"
+      )
+
+    st.download_button(
+        label="📥 Download Session Report",
+        data=session_export_markdown,
+        file_name="plainsight_complete_session_report.md",
+        mime="text/markdown",
+        use_container_width=True,
+    )
+    st.markdown("---")
+
+    for idx, item in enumerate(reversed(st.session_state.history)):
+      with st.expander(f"{item['category']} ({item['time']})"):
+        st.image(item["image"], use_container_width=True)
+        st.markdown(item["text"])
+
 # Display the custom PNG Logo Lockup
 st.image("PlainSight logo.png", width=200)
 
-st.markdown("<p style='color: #F8FAFC; font-weight: 600;'>Upload an outfit photograph to receive a structured styling breakdown.</p>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='color: #F8FAFC; font-weight: 600;'>Upload an outfit photograph"
+    " to receive a structured styling breakdown.</p>",
+    unsafe_allow_html=True,
+)
 st.markdown("---")
+
 # Target Image Section
 st.subheader("Target Image")
+
 # Category selection mapped to your custom styled themes
 category = st.selectbox(
     "Select Outfit Category",
-    ["Casual / Everyday", "Business / Formal", "Evening / Special Occasion", "Athleisure"]
+    [
+        "Casual / Everyday",
+        "Business / Formal",
+        "Evening / Special Occasion",
+        "Athleisure",
+    ],
 )
-# Render the active category box with your exact custom colorsif category == "Casual / Everyday":
-    st.markdown('<div class="cat-casual">✨ Active Category: Casual / Everyday</div>', unsafe_allow_html=True)elif category == "Business / Formal":
-    st.markdown('<div class="cat-business">💼 Active Category: Business / Formal</div>', unsafe_allow_html=True)elif category == "Evening / Special Occasion":
-    st.markdown('<div class="cat-evening">🌙 Active Category: Evening / Special Occasion</div>', unsafe_allow_html=True)else:
-    st.markdown('<div class="cat-athleisure">⚡ Active Category: Athleisure</div>', unsafe_allow_html=True)
 
-st.markdown('<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose an outfit image</p>', unsafe_allow_html=True)
-uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+# Render the active category box with your exact custom colors
+if category == "Casual / Everyday":
+  st.markdown(
+      '<div class="cat-casual">✨ Active Category: Casual / Everyday</div>',
+      unsafe_allow_html=True,
+  )
+elif category == "Business / Formal":
+  st.markdown(
+      '<div class="cat-business">💼 Active Category: Business / Formal</div>',
+      unsafe_allow_html=True,
+  )
+elif category == "Evening / Special Occasion":
+  st.markdown(
+      '<div class="cat-evening">🌙 Active Category: Evening / Special'
+      " Occasion</div>",
+      unsafe_allow_html=True,
+  )
+else:
+  st.markdown(
+      '<div class="cat-athleisure">⚡ Active Category: Athleisure</div>',
+      unsafe_allow_html=True,
+  )
+
+st.markdown(
+    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose'
+    " an outfit image</p>",
+    unsafe_allow_html=True,
+)
+uploaded_file = st.file_uploader(
+    "", type=["jpg", "jpeg", "png"], label_visibility="collapsed"
+)
+
 if uploaded_file is not None:
-    st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
-    st.markdown("---")
+  st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
+  st.markdown("---")
 
-    # Analysis Section
-    st.subheader("Analysis & Guidance")
-    
-    if st.button("Reveal the Truth"):
-        if uploaded_file is None:
-            st.warning("Please upload an outfit image first.")
-        else:
-            loading_placeholder = st.empty()
-            messages = [
-                ("Looking and analysing...", "👔"),
-                ("Checking the vibe...", "✨"),
-                ("Putting it all together...", "🔍"),
-            ]
-            for msg, icon in messages:
-                loading_placeholder.markdown(f"""
-                    <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
-                        {msg} {icon}
-                    </div>
-                """, unsafe_allow_html=True)
-                time.sleep(1.2)
-            loading_placeholder.empty()
+  # Analysis Section
+  st.subheader("Analysis & Guidance")
 
-            # Live Gemini AI Analysis with multi-model auto-fallback loop
-            response = None
-            error_message = None
-            
-            candidate_models = ['gemini-3.8-flash', 'gemini-3.6-flash']
+  if st.button("Reveal the Truth"):
+    if uploaded_file is None:
+      st.warning("Please upload an outfit image first.")
+    else:
+      loading_placeholder = st.empty()
+      messages = [
+          ("Looking and analysing...", "👔"),
+          ("Checking the vibe...", "✨"),
+          ("Putting it all together...", "🔍"),
+      ]
+      for msg, icon in messages:
+        loading_placeholder.markdown(
+            f"""
+                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
+                    {msg} {icon}
+                </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        time.sleep(1.2)
+      loading_placeholder.empty()
 
-            client = genai.Client()
-            prompt = f"""
+      # Live Gemini AI Analysis with multi-model auto-fallback loop
+      response = None
+      error_message = None
+
+      candidate_models = ["gemini-3.8-flash", "gemini-3.6-flash"]
+
+      client = genai.Client()
+      prompt = f"""
             Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
             ### Strengths
             ### Assessment
             ### Refinements
             Keep the content fully detailed, insightful, and professional.
             """
-            image_part = types.Part.from_bytes(
-                data=uploaded_file.getvalue(),
-                mime_type=uploaded_file.type
-            )
+      image_part = types.Part.from_bytes(
+          data=uploaded_file.getvalue(), mime_type=uploaded_file.type
+      )
 
-            for model_name in candidate_models:
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=[prompt, image_part]
-                    )
-                    if response and hasattr(response, 'text'):
-                        break
-                except Exception as e:
-                    error_message = str(e)
-                    time.sleep(1)
-                    continue
+      for model_name in candidate_models:
+        try:
+          response = client.models.generate_content(
+              model=model_name, contents=[prompt, image_part]
+          )
+          if response and hasattr(response, "text"):
+            break
+        except Exception as e:
+          error_message = str(e)
+          time.sleep(1)
+          continue
 
-            if response and hasattr(response, 'text'):
-                analysis_text = response.text
+      if response and hasattr(response, "text"):
+        analysis_text = response.text
 
-                # Save to Session History Log
-                current_time = time.strftime("%H:%M:%S")
-                st.session_state.history.append({
-                    "category": category,
-                    "time": current_time,
-                    "image": uploaded_file.getvalue(),
-                    "text": analysis_text
-                })
+        # Save to Session History Log
+        current_time = time.strftime("%H:%M:%S")
+        st.session_state.history.append({
+            "category": category,
+            "time": current_time,
+            "image": uploaded_file.getvalue(),
+            "text": analysis_text,
+        })
 
-                st.markdown(f"### Findings ({category})")
+        st.markdown(f"### Findings ({category})")
 
-                # Splitting and rendering the output into collapsible color-coded card expanders
-                chunks = analysis_text.split("###")
-                for chunk in chunks:
-                    if chunk.strip():
-                        lines = chunk.strip().split("\n", 1)
-                        title = lines[0].strip().replace("#", "").strip()
-                        body = lines[1].strip() if len(lines) > 1 else ""
+        # Splitting and rendering the output into collapsible color-coded card expanders
+        chunks = analysis_text.split("###")
+        for chunk in chunks:
+          if chunk.strip():
+            lines = chunk.strip().split("\n", 1)
+            title = lines[0].strip().replace("#", "").strip()
+            body = lines[1].strip() if len(lines) > 1 else ""
 
-                        if title == "Strengths":
-                            with st.expander(f"✨ {title} (Click to expand/collapse)", expanded=True):
-                                st.markdown(f"""
+            if title == "Strengths":
+              with st.expander(
+                  f"✨ {title} (Click to expand/collapse)", expanded=True
+              ):
+                st.markdown(
+                    f"""
                                     <div class="card-strengths">
                                         <div class="header-strengths">{title}</div>
                                     </div>
-                                """, unsafe_allow_html=True)
-                                st.markdown(body)
-                        elif title == "Assessment":
-                            with st.expander(f"⭐ {title} (Click to expand/collapse)", expanded=True):
-                                st.markdown(f"""
+                                """,
+                    unsafe_allow_html=True,
+                )
+                st.markdown(body)
+            elif title == "Assessment":
+              with st.expander(
+                  f"⭐ {title} (Click to expand/collapse)", expanded=True
+              ):
+                st.markdown(
+                    f"""
                                     <div class="card-assessment">
                                         <div class="header-assessment">{title}</div>
                                     </div>
-                                """, unsafe_allow_html=True)
-                                st.markdown(body)
-                        elif title == "Refinements":
-                            with st.expander(f"🎯 {title} (Click to expand/collapse)", expanded=True):
-                                st.markdown(f"""
+                                """,
+                    unsafe_allow_html=True,
+                )
+                st.markdown(body)
+            elif title == "Refinements":
+              with st.expander(
+                  f"🎯 {title} (Click to expand/collapse)", expanded=True
+              ):
+                st.markdown(
+                    f"""
                                     <div class="card-refinements">
                                         <div class="header-refinements">{title}</div>
                                     </div>
-                                """, unsafe_allow_html=True)
-                                st.markdown(body)
-
-                # Centered analysis complete message
-                st.markdown("""
-                    <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-                        <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                            Analysis complete.
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
-
-                # Export / Download Button for Individual Report
-                report_markdown = f"# PlainSight Styling Report\n\n**Category:** {category}\n\n{analysis_text}"
-                st.download_button(
-                    label="📥 Download Styling Report",
-                    data=report_markdown,
-                    file_name=f"plainsight_report_{category.lower().replace('/', '_').strip()}.md",
-                    mime="text/markdown"
+                                """,
+                    unsafe_allow_html=True,
                 )
-            else:
-                st.error(f"Unable to connect to the model endpoint. (Details: {error_message})")
+                st.markdown(body)
+
+        # Centered analysis complete message
+        st.markdown(
+            """
+                <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+                    <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        Analysis complete.
+                    </div>
+                </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Export / Download Button for Individual Report
+        report_markdown = (
+            f"# PlainSight Styling Report\n\n**Category:**"
+            f" {category}\n\n{analysis_text}"
+        )
+        st.download_button(
+            label="📥 Download Styling Report",
+            data=report_markdown,
+            file_name=(
+                "plainsight_report_"
+                f"{category.lower().replace('/', '_').strip()}.md"
+            ),
+            mime="text/markdown",
+        )
+      else:
+        st.error(
+            "Unable to connect to the model endpoint. (Details:"
+            f" {error_message})"
+        )
