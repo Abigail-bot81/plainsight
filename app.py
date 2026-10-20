@@ -262,7 +262,6 @@ if uploaded_file is not None:
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      # Quick spinner for instant feedback
       with st.spinner("Analyzing outfit..."):
         client = genai.Client()
         prompt = f"""
@@ -280,7 +279,7 @@ if uploaded_file is not None:
 
         try:
           response = client.models.generate_content(
-              model="gemini-2.5-flash", contents=[prompt, image_part]
+              model="gemini-3.8-flash", contents=[prompt, image_part]
           )
         except Exception as e:
           response = None
