@@ -165,9 +165,11 @@ def optimize_uploaded_image(uploaded_file):
   return buffered.getvalue()
 
 
-# Initialize Session State for History Log
+# Initialize Session State for History Log & Analysis Trigger
 if "history" not in st.session_state:
   st.session_state.history = []
+if "run_analysis" not in st.session_state:
+  st.session_state.run_analysis = False
 
 # Sidebar for Outfit History Log & Session Export
 with st.sidebar:
@@ -256,133 +258,137 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  # Analysis Section Header & Button
+  # Analysis Section Header & Button container
   st.subheader("Analysis & Guidance")
 
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      # Render header and placeholder ONLY after the button is clicked
-      st.markdown(f"### Findings ({category})")
-      live_placeholder = st.empty()
+      st.session_state.run_analysis = True
 
-      client = genai.Client()
-      prompt = f"""
-            Analyze this outfit for '{category}'. Provide feedback using exactly these headers:
-            ### Strengths
-            ### Assessment
-            ### Refinements
-            Keep it concise, professional, and sharp.
-            """
+  # Only render findings and execute model when the button has explicitly been pressed
+  if st.session_state.run_analysis:
+    st.markdown(f"### Findings ({category})")
+    live_placeholder = st.empty()
 
-      optimized_image_bytes = optimize_uploaded_image(uploaded_file)
-      image_part = types.Part.from_bytes(
-          data=optimized_image_bytes, mime_type="image/jpeg"
+    client = genai.Client()
+    prompt = f"""
+        Analyze this outfit for '{category}'. Provide feedback using exactly these headers:
+        ### Strengths
+        ### Assessment
+        ### Refinements
+        Keep it concise, professional, and sharp.
+        """
+
+    optimized_image_bytes = optimize_uploaded_image(uploaded_file)
+    image_part = types.Part.from_bytes(
+        data=optimized_image_bytes, mime_type="image/jpeg"
+    )
+
+    analysis_text = ""
+    error_message = ""
+
+    try:
+      config = types.GenerateContentConfig(max_output_tokens=600, temperature=0.4)
+      response_stream = client.models.generate_content_stream(
+          model="gemini-3.8-flash", contents=[prompt, image_part], config=config
+      )
+      for chunk in response_stream:
+        if hasattr(chunk, "text") and chunk.text:
+          analysis_text += chunk.text
+          live_placeholder.markdown(analysis_text)
+    except Exception as e:
+      error_message = str(e)
+
+    if analysis_text:
+      # Save to Session History Log
+      current_time = time.strftime("%H:%M:%S")
+      st.session_state.history.append({
+          "category": category,
+          "time": current_time,
+          "image": uploaded_file.getvalue(),
+          "text": analysis_text,
+      })
+
+      # Clear raw text and build styled card expanders
+      live_placeholder.empty()
+      chunks = analysis_text.split("###")
+      for chunk in chunks:
+        if chunk.strip():
+          lines = chunk.strip().split("\n", 1)
+          title = lines[0].strip().replace("#", "").strip()
+          body = lines[1].strip() if len(lines) > 1 else ""
+
+          if title == "Strengths":
+            with st.expander(
+                f"✨ {title} (Click to expand/collapse)", expanded=True
+            ):
+              st.markdown(
+                  f"""
+                                <div class="card-strengths">
+                                    <div class="header-strengths">{title}</div>
+                                </div>
+                            """,
+                  unsafe_allow_html=True,
+              )
+              st.markdown(body)
+          elif title == "Assessment":
+            with st.expander(
+                f"⭐ {title} (Click to expand/collapse)", expanded=True
+            ):
+              st.markdown(
+                  f"""
+                                <div class="card-assessment">
+                                    <div class="header-assessment">{title}</div>
+                                </div>
+                            """,
+                  unsafe_allow_html=True,
+              )
+              st.markdown(body)
+          elif title == "Refinements":
+            with st.expander(
+                f"🎯 {title} (Click to expand/collapse)", expanded=True
+            ):
+              st.markdown(
+                  f"""
+                                <div class="card-refinements">
+                                    <div class="header-refinements">{title}</div>
+                                </div>
+                            """,
+                  unsafe_allow_html=True,
+              )
+              st.markdown(body)
+
+      st.markdown(
+          """
+            <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+                <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                    Analysis complete.
+                </div>
+            </div>
+        """,
+          unsafe_allow_html=True,
       )
 
-      analysis_text = ""
-      error_message = ""
+      report_markdown = (
+          f"# PlainSight Styling Report\n\n**Category:**"
+          f" {category}\n\n{analysis_text}"
+      )
+      st.download_button(
+          label="📥 Download Styling Report",
+          data=report_markdown,
+          file_name=(
+              "plainsight_report_"
+              f"{category.lower().replace('/', '_').strip()}.md"
+          ),
+          mime="text/markdown",
+      )
 
-      # Stream text immediately with token limits for instant speed
-      try:
-        config = types.GenerateContentConfig(
-            max_output_tokens=600, temperature=0.4
-        )
-        response_stream = client.models.generate_content_stream(
-            model="gemini-3.8-flash", contents=[prompt, image_part], config=config
-        )
-        for chunk in response_stream:
-          if hasattr(chunk, "text") and chunk.text:
-            analysis_text += chunk.text
-            live_placeholder.markdown(analysis_text)
-      except Exception as e:
-        error_message = str(e)
-
-      if analysis_text:
-        # Save to Session History Log
-        current_time = time.strftime("%H:%M:%S")
-        st.session_state.history.append({
-            "category": category,
-            "time": current_time,
-            "image": uploaded_file.getvalue(),
-            "text": analysis_text,
-        })
-
-        # Clear raw streaming text and render styled card expanders
-        live_placeholder.empty()
-        chunks = analysis_text.split("###")
-        for chunk in chunks:
-          if chunk.strip():
-            lines = chunk.strip().split("\n", 1)
-            title = lines[0].strip().replace("#", "").strip()
-            body = lines[1].strip() if len(lines) > 1 else ""
-
-            if title == "Strengths":
-              with st.expander(
-                  f"✨ {title} (Click to expand/collapse)", expanded=True
-              ):
-                st.markdown(
-                    f"""
-                                    <div class="card-strengths">
-                                        <div class="header-strengths">{title}</div>
-                                    </div>
-                                """,
-                    unsafe_allow_html=True,
-                )
-                st.markdown(body)
-            elif title == "Assessment":
-              with st.expander(
-                  f"⭐ {title} (Click to expand/collapse)", expanded=True
-              ):
-                st.markdown(
-                    f"""
-                                    <div class="card-assessment">
-                                        <div class="header-assessment">{title}</div>
-                                    </div>
-                                """,
-                    unsafe_allow_html=True,
-                )
-                st.markdown(body)
-            elif title == "Refinements":
-              with st.expander(
-                  f"🎯 {title} (Click to expand/collapse)", expanded=True
-              ):
-                st.markdown(
-                    f"""
-                                    <div class="card-refinements">
-                                        <div class="header-refinements">{title}</div>
-                                    </div>
-                                """,
-                    unsafe_allow_html=True,
-                )
-                st.markdown(body)
-
-        st.markdown(
-            """
-                <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-                    <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                        Analysis complete.
-                    </div>
-                </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        report_markdown = (
-            f"# PlainSight Styling Report\n\n**Category:**"
-            f" {category}\n\n{analysis_text}"
-        )
-        st.download_button(
-            label="📥 Download Styling Report",
-            data=report_markdown,
-            file_name=(
-                "plainsight_report_"
-                f"{category.lower().replace('/', '_').strip()}.md"
-            ),
-            mime="text/markdown",
-        )
-      else:
+      # Reset trigger so it doesn't loop unintentionally on next interaction
+      st.session_state.run_analysis = False
+    else:
+      if error_message:
         st.error(
             "Unable to connect to the model endpoint. (Details:"
             f" {error_message})"
