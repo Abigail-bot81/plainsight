@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Styling & CSS Polish
+# Custom Styling & CSS Polish for a Sleek UI
 st.markdown("""
     <style>
     .main {
@@ -20,9 +20,21 @@ st.markdown("""
         width: 100%;
         border-radius: 8px;
         font-weight: bold;
+        background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        border: none;
+    }
+    .stButton>button:hover {
+        opacity: 0.9;
     }
     .uploadedFile {
         border-radius: 8px;
+    }
+    .metric-card {
+        background-color: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -33,11 +45,12 @@ st.markdown("""
 st.title("✨ PlainSight")
 st.write(
     "Upload an outfit photograph to receive an instant, structured styling"
-    " breakdown and professional fashion assessment."
+    " breakdown, professional fashion assessment, and tailored wardrobe"
+    " recommendations."
 )
 
-# Sidebar / Category selection & Preferences
-st.sidebar.header("Styling Settings")
+# Sidebar / Category selection & Advanced Preferences
+st.sidebar.header("🎨 Styling Settings")
 category = st.sidebar.selectbox(
     "Select Outfit Category",
     [
@@ -45,17 +58,25 @@ category = st.sidebar.selectbox(
         "Work / Business Professional",
         "Formal / Evening",
         "Athleisure / Active",
+        "Date Night / Social",
     ],
 )
 
 style_vibe = st.sidebar.selectbox(
-    "Preferred Tone", ["Constructive & Direct", "Encouraging & Chic", "Editorial"]
+    "Preferred Feedback Tone",
+    ["Constructive & Direct", "Encouraging & Chic", "Editorial / High Fashion"],
+)
+
+focus_area = st.sidebar.multiselect(
+    "Primary Focus Areas",
+    ["Color Coordination", "Proportions & Fit", "Accessorizing", "Layering"],
+    default=["Color Coordination", "Proportions & Fit"],
 )
 
 st.sidebar.divider()
 st.sidebar.info(
-    "💡 **Tip:** Ensure your photo has good natural lighting for the most"
-    " accurate color and fit breakdown."
+    "💡 **Pro Tip:** Ensure your photo has clean natural lighting and shows the"
+    " full silhouette for the most accurate styling breakdown."
 )
 
 st.divider()
@@ -76,15 +97,18 @@ if uploaded_file is not None:
     )
 
   st.write("")
-  st.write(
-      f"**Active Category:** `{category}` | **Analysis Mode:** `{style_vibe}`"
+  st.markdown(
+      f"**Active Category:** `{category}` &nbsp;|&nbsp; **Tone:**"
+      f" `{style_vibe}`"
   )
 
   # Main Action Button
   if st.button("Reveal the Truth", type="primary"):
-    with st.spinner("Analyzing outfit..."):
+    with st.spinner(
+        "Analyzing fabric texture, color harmony, and silhouette proportions..."
+    ):
       # --- PLACEHOLDER FOR YOUR AI/GEMINI VISION CALL ---
-      # response = model.generate_content([uploaded_file, f"Analyze this outfit for {category} with a {style_vibe} tone."])
+      # response = model.generate_content([uploaded_file, f"Analyze this outfit for {category} with a {style_vibe} tone focusing on {focus_area}."])
 
       # Structured Display Blocks
       st.success("Analysis complete!")
@@ -94,35 +118,62 @@ if uploaded_file is not None:
       # Expander 1: Strengths
       with st.expander("✨ Core Strengths & Highlights", expanded=True):
         st.markdown("""
-                - **Color Harmony:** The palette complements underlying tone selections effectively without visual friction.
-                - **Silhouette & Balance:** Proportions are well-managed, creating an approachable and structured look.
-                - **Contextual Fit:** Aligns neatly with expectations for the selected category.
+                - **Color Harmony:** The chosen palette complements underlying tone selections effectively without visual friction or clashing.
+                - **Silhouette & Balance:** Proportions are well-managed, establishing an approachable, clean, and balanced look.
+                - **Contextual Fit:** Aligns neatly with expectations and dress codes for the selected category.
                 """)
 
       # Expander 2: Detailed Assessment
       with st.expander("⭐ Detailed Aesthetic Assessment", expanded=True):
         st.write(
             "The outfit delivers a strong foundational aesthetic. The garment"
-            " pairings establish a clear visual narrative, though minor"
-            " adjustments in layering or accessory placement can elevate the"
-            " overall impact from standard to statement-level."
+            " pairings establish a clear visual narrative, though strategic"
+            " adjustments in layering, tailoring, or accessory placement can"
+            " elevate the overall impact from standard to statement-level."
         )
 
       # Expander 3: Actionable Refinements
       with st.expander("🎯 Actionable Refinements", expanded=True):
         st.markdown("""
-                - **Anchor the Proportions:** Consider a subtle tuck or structured belt line to accentuate height.
-                - **Introduce Textural Contrast:** Pairing smooth fabrics with a textured layer (like knitwear or tailored outerwear) adds depth.
-                - **Accessory Focus:** Keep metal accents unified (all gold or all silver) to maintain a cohesive finish.
+                - **Anchor the Proportions:** Consider a subtle tuck or structured belt line to accentuate height and define the waist.
+                - **Introduce Textural Contrast:** Pairing smooth fabrics with a textured layer (like knitwear, leather, or tailored outerwear) adds immediate depth.
+                - **Accessory Focus:** Keep metal accents unified (all gold or all silver) to maintain a cohesive, high-end finish.
+                """)
+
+      # Expander 4: Suggested Shopping / Pairings
+      with st.expander("🛍️ Recommended Complementary Pieces"):
+        st.markdown("""
+                - **Footwear:** Structured loafers or clean minimalist leather sneakers.
+                - **Outerwear:** Tailored single-breasted blazer or a classic trench coat.
+                - **Accents:** Minimalist pendant necklace or structured structured crossbody bag.
                 """)
 
       st.divider()
 
       # Download Report Section
-      report_text = (
-          f"PLAIN-SIGHT STYLE REPORT\nCategory: {category}\nTone:"
-          f" {style_vibe}\n\nStatus: Complete and Analyzed."
-      )
+      report_text = f"""========================================
+PLAIN-SIGHT STYLE REPORT
+========================================
+Category: {category}
+Feedback Tone: {style_vibe}
+Focus Areas: {', '.join(focus_area)}
+
+[ CORE STRENGTHS ]
+- Color Harmony: Solid palette coordination.
+- Silhouette & Balance: Well-managed proportions.
+- Contextual Fit: Aligns with category expectations.
+
+[ DETAILED ASSESSMENT ]
+The outfit delivers a strong foundational aesthetic with clear visual narratives.
+
+[ ACTIONABLE REFINEMENTS ]
+- Anchor proportions with a subtle tuck or belt.
+- Introduce textural contrast via layering.
+- Keep metal accents unified.
+
+Status: Complete and Analyzed.
+========================================
+"""
       st.download_button(
           label="📥 Download Full Styling Report",
           data=report_text,
@@ -130,15 +181,26 @@ if uploaded_file is not None:
           mime="text/plain",
       )
 else:
-  # Empty state banner
+  # Empty state banner & onboarding guide
   st.info(
-      "👆 Please upload an image above to start your instant styling analysis."
+      "👆 Please upload an outfit image above to start your instant styling"
+      " analysis."
   )
 
-  # Quick feature breakdown for first-time visitors
-  with st.expander("How PlainSight Works"):
-    st.markdown("""
-        1. **Upload:** Drop your outfit picture above (JPEG or PNG).
-        2. **Configure:** Pick your category and preferred feedback tone in the sidebar.
-        3. **Reveal:** Hit **Reveal the Truth** to instantly get structured feedback on strengths, assessments, and actionable refinements.
-        """)
+  col_a, col_b = st.columns(2)
+  with col_a:
+    with st.container():
+      st.markdown("### 🚀 What PlainSight Does")
+      st.write(
+          "PlainSight acts as your personal AI stylist, giving you instant,"
+          " constructive feedback on color theory, fit, and wardrobe"
+          " enhancements."
+      )
+
+  with col_b:
+    with st.expander("📖 How It Works", expanded=True):
+      st.markdown("""
+            1. **Upload:** Drop your outfit picture above (JPEG or PNG).
+            2. **Configure:** Pick your category and preferred feedback tone in the sidebar.
+            3. **Reveal:** Hit **Reveal the Truth** to instantly unlock professional fashion insights.
+            """)
