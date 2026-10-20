@@ -277,13 +277,19 @@ if uploaded_file is not None:
             data=optimized_image_bytes, mime_type="image/jpeg"
         )
 
-        try:
-          response = client.models.generate_content(
-              model="gemini-3.8-flash", contents=[prompt, image_part]
-          )
-        except Exception as e:
-          response = None
-          error_message = str(e)
+        response = None
+        error_message = ""
+        # Automatic retry loop to handle temporary high-demand spikes smoothly
+        for attempt in range(3):
+          try:
+            response = client.models.generate_content(
+                model="gemini-3.8-flash", contents=[prompt, image_part]
+            )
+            if response and hasattr(response, "text"):
+              break
+          except Exception as e:
+            error_message = str(e)
+            time.sleep(1.5)
 
       if response and hasattr(response, "text"):
         analysis_text = response.text
