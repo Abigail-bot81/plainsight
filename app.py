@@ -246,7 +246,7 @@ else:
   )
 
 st.markdown(
-    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose"
+    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose'
     " an outfit image</p>",
     unsafe_allow_html=True,
 )
@@ -290,7 +290,6 @@ if uploaded_file is not None:
     # Multi-model fallback sequence to bypass 503 traffic spikes smoothly
     candidate_models = [
         "gemini-flash-latest",
-        "gemini-3.8-flash",
         "gemini-2.5-flash",
     ]
 
