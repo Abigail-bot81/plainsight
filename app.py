@@ -258,8 +258,6 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  st.subheader("Analysis & Guidance")
-
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
