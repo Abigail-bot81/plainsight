@@ -268,7 +268,10 @@ if uploaded_file is not None:
     st.markdown(f"### Findings ({category})")
     live_placeholder = st.empty()
 
-    client = genai.Client()
+    # Initialize Gemini Client securely using Streamlit Secrets
+    api_key = st.secrets.get("GEMINI_API_KEY", None)
+    client = genai.Client(api_key=api_key) if api_key else genai.Client()
+
     prompt = f"""
         Analyze this outfit for '{category}'. Provide feedback using exactly these headers:
         ### Strengths
@@ -285,7 +288,7 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
-    candidate_models = ["gemini-3.8-flash", "gemini-flash-latest"]
+    candidate_models = ["gemini-2.5-flash", "gemini-flash-latest"]
 
     for model_name in candidate_models:
       try:
