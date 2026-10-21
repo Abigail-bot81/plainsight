@@ -287,11 +287,8 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
-    # Updated active production candidate models list
-    candidate_models = [
-        "gemini-flash-latest",
-        "gemini-3.8-flash",
-    ]
+    # Primary robust production model with fail-safes
+    candidate_models = ["gemini-3.8-flash", "gemini-flash-latest"]
 
     for model_name in candidate_models:
       try:
