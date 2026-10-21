@@ -267,6 +267,7 @@ if uploaded_file is not None:
       st.session_state.run_analysis = True
 
   if st.session_state.run_analysis:
+    # Findings header is now correctly encapsulated inside the active analysis block
     st.markdown(f"### Findings ({category})")
     live_placeholder = st.empty()
 
