@@ -287,10 +287,10 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
-    # Multi-model fallback sequence to bypass 503 traffic spikes smoothly
+    # Updated active production candidate models list
     candidate_models = [
         "gemini-flash-latest",
-        "gemini-2.5-flash",
+        "gemini-3.8-flash",
     ]
 
     for model_name in candidate_models:
