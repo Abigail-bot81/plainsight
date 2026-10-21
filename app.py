@@ -153,15 +153,15 @@ st.markdown(
 )
 
 
-# Helper function for maximum speed image compression
+# Helper function for aggressive and instant image compression
 def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
     img = img.convert("RGB")
-  max_size = (250, 250)
+  max_size = (300, 300)
   img.thumbnail(max_size, Image.Resampling.LANCZOS)
   buffered = BytesIO()
-  img.save(buffered, format="JPEG", quality=60)
+  img.save(buffered, format="JPEG", quality=50)
   return buffered.getvalue()
 
 
@@ -287,13 +287,12 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
-    # Primary robust production model with fail-safes
     candidate_models = ["gemini-3.8-flash", "gemini-flash-latest"]
 
     for model_name in candidate_models:
       try:
         config = types.GenerateContentConfig(
-            max_output_tokens=400, temperature=0.3
+            max_output_tokens=300, temperature=0.3
         )
         response_stream = client.models.generate_content_stream(
             model=model_name, contents=[prompt, image_part], config=config
@@ -306,10 +305,10 @@ if uploaded_file is not None:
 
         if temp_text:
           analysis_text = temp_text
-          break  # Success! Exit loop
+          break  # Success! Exit loop instantly
       except Exception as e:
         error_message = str(e)
-        time.sleep(0.5)
+        time.sleep(0.3)
         continue
 
     if analysis_text:
