@@ -153,19 +153,19 @@ st.markdown(
 )
 
 
-# Helper function to hyper-optimize image for instant AI processing
+# Helper function for maximum speed image compression
 def optimize_uploaded_image(uploaded_file):
   img = Image.open(uploaded_file)
   if img.mode in ("RGBA", "P"):
     img = img.convert("RGB")
-  max_size = (350, 350)
+  max_size = (250, 250)
   img.thumbnail(max_size, Image.Resampling.LANCZOS)
   buffered = BytesIO()
-  img.save(buffered, format="JPEG", quality=70)
+  img.save(buffered, format="JPEG", quality=60)
   return buffered.getvalue()
 
 
-# Initialize Session State for History Log & Analysis Trigger
+# Initialize Session State
 if "history" not in st.session_state:
   st.session_state.history = []
 if "run_analysis" not in st.session_state:
@@ -246,7 +246,7 @@ else:
   )
 
 st.markdown(
-    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose'
+    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose"
     " an outfit image</p>",
     unsafe_allow_html=True,
 )
@@ -258,7 +258,6 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  # Analysis Section Header & Button container
   st.subheader("Analysis & Guidance")
 
   if st.button("Reveal the Truth"):
@@ -267,7 +266,6 @@ if uploaded_file is not None:
     else:
       st.session_state.run_analysis = True
 
-  # Only render findings and execute model when the button has explicitly been pressed
   if st.session_state.run_analysis:
     st.markdown(f"### Findings ({category})")
     live_placeholder = st.empty()
@@ -278,7 +276,7 @@ if uploaded_file is not None:
         ### Strengths
         ### Assessment
         ### Refinements
-        Keep it concise, professional, and sharp.
+        Keep it concise, punchy, and professional.
         """
 
     optimized_image_bytes = optimize_uploaded_image(uploaded_file)
@@ -289,21 +287,36 @@ if uploaded_file is not None:
     analysis_text = ""
     error_message = ""
 
-    # Using gemini-flash-latest for stable, high-speed production calls
-    try:
-      config = types.GenerateContentConfig(max_output_tokens=600, temperature=0.4)
-      response_stream = client.models.generate_content_stream(
-          model="gemini-flash-latest", contents=[prompt, image_part], config=config
-      )
-      for chunk in response_stream:
-        if hasattr(chunk, "text") and chunk.text:
-          analysis_text += chunk.text
-          live_placeholder.markdown(analysis_text)
-    except Exception as e:
-      error_message = str(e)
+    # Multi-model fallback sequence to bypass 503 traffic spikes smoothly
+    candidate_models = [
+        "gemini-flash-latest",
+        "gemini-3.8-flash",
+        "gemini-2.5-flash",
+    ]
+
+    for model_name in candidate_models:
+      try:
+        config = types.GenerateContentConfig(
+            max_output_tokens=400, temperature=0.3
+        )
+        response_stream = client.models.generate_content_stream(
+            model=model_name, contents=[prompt, image_part], config=config
+        )
+        temp_text = ""
+        for chunk in response_stream:
+          if hasattr(chunk, "text") and chunk.text:
+            temp_text += chunk.text
+            live_placeholder.markdown(temp_text)
+
+        if temp_text:
+          analysis_text = temp_text
+          break  # Success! Exit loop
+      except Exception as e:
+        error_message = str(e)
+        time.sleep(0.5)
+        continue
 
     if analysis_text:
-      # Save to Session History Log
       current_time = time.strftime("%H:%M:%S")
       st.session_state.history.append({
           "category": category,
@@ -312,7 +325,6 @@ if uploaded_file is not None:
           "text": analysis_text,
       })
 
-      # Clear raw text and build styled card expanders
       live_placeholder.empty()
       chunks = analysis_text.split("###")
       for chunk in chunks:
@@ -386,11 +398,10 @@ if uploaded_file is not None:
           mime="text/markdown",
       )
 
-      # Reset trigger so it doesn't loop unintentionally on next interaction
       st.session_state.run_analysis = False
     else:
       if error_message:
         st.error(
-            "Unable to connect to the model endpoint. (Details:"
-            f" {error_message})"
+            "Unable to connect to the model endpoint due to high traffic."
+            f" (Details: {error_message})"
         )
