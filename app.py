@@ -252,8 +252,8 @@ if uploaded_file is not None:
       response = None
       error_message = None
 
-      # Switched back to the faster 2.5-flash model with a strict timeout guard
-      target_model = "gemini-2.5-flash"
+      # Updated back to the required current model endpoint
+      target_model = "gemini-3.8-flash"
 
       api_key = st.secrets.get("GEMINI_API_KEY", None)
       client = genai.Client(api_key=api_key) if api_key else genai.Client()
@@ -282,11 +282,7 @@ if uploaded_file is not None:
 
         with st.spinner("Analyzing outfit..."):
           response = client.models.generate_content(
-              model=target_model,
-              contents=[prompt, image_part],
-              config=types.GenerateContentConfig(
-                  http_options={"timeout": 10000}
-              ),  # 10 second hard limit so it never hangs for minutes
+              model=target_model, contents=[prompt, image_part]
           )
 
       except Exception as e:
@@ -379,6 +375,6 @@ if uploaded_file is not None:
         )
       else:
         st.error(
-            "⚠️ The request took too long or the server is busy. (Details:"
-            f" {error_message})"
+            "⚠️ Unable to generate analysis right now. Please check your image"
+            f" format or connection. (Details: {error_message})"
         )
