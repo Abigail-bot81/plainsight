@@ -288,17 +288,26 @@ if uploaded_file is not None:
             data=uploaded_file.getvalue(), mime_type=uploaded_file.type
         )
 
-        for model_name in candidate_models:
-          try:
-            response = client.models.generate_content(
-                model=model_name, contents=[prompt, image_part]
-            )
-            if response and hasattr(response, "text") and response.text:
-              break
-          except Exception as model_err:
-            error_message = str(model_err)
-            time.sleep(0.5)
-            continue
+        # Automatic Retry Loop (Tries up to 3 times silently if server is busy)
+        max_retries = 3
+        for attempt in range(max_retries):
+          for model_name in candidate_models:
+            try:
+              response = client.models.generate_content(
+                  model=model_name, contents=[prompt, image_part]
+              )
+              if response and hasattr(response, "text") and response.text:
+                break
+            except Exception as model_err:
+              error_message = str(model_err)
+              continue
+
+          if response and hasattr(response, "text") and response.text:
+            break  # Success! Exit retry loop
+
+          # If it failed all models on this attempt, wait 2 seconds and retry
+          if attempt < max_retries - 1:
+            time.sleep(2)
 
       except Exception as e:
         error_message = str(e)
@@ -314,7 +323,6 @@ if uploaded_file is not None:
             "text": analysis_text,
         })
 
-        # Display subheader right before rendering findings
         st.subheader("Analysis & Guidance")
         st.markdown(f"### Findings ({category})")
 
