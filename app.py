@@ -283,9 +283,18 @@ if uploaded_file is not None:
             Keep the content fully detailed, insightful, and professional.
             """
 
-      try:
+     try:
+        # Open image with PIL, resize it to max 800px wide for lightning-fast processing
+        img = Image.open(uploaded_file)
+        img.thumbnail((800, 800))
+
+        # Save compressed image into bytes buffer
+        img_byte_arr = BytesIO()
+        img.save(img_byte_arr, format=img.format if img.format else "JPEG")
+        compressed_image_bytes = img_byte_arr.getvalue()
+
         image_part = types.Part.from_bytes(
-            data=uploaded_file.getvalue(), mime_type=uploaded_file.type
+            data=compressed_image_bytes, mime_type=uploaded_file.type
         )
 
         # Streamlined execution loop with fast model fallback
