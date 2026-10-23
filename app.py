@@ -231,7 +231,7 @@ else:
   )
 
 st.markdown(
-    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose"
+    '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose'
     " an outfit image</p>",
     unsafe_allow_html=True,
 )
@@ -252,7 +252,6 @@ if uploaded_file is not None:
       response = None
       error_message = None
 
-      # Explicitly updated to gemini-3.8-flash as required by the server API
       target_model = "gemini-3.8-flash"
 
       api_key = st.secrets.get("GEMINI_API_KEY", None)
