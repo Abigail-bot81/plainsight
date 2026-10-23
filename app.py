@@ -264,7 +264,7 @@ if uploaded_file is not None:
             """,
             unsafe_allow_html=True,
         )
-        time.sleep(0.6)
+        time.sleep(0.4)
       loading_placeholder.empty()
 
       response = None
@@ -288,26 +288,24 @@ if uploaded_file is not None:
             data=uploaded_file.getvalue(), mime_type=uploaded_file.type
         )
 
-        # Automatic Retry Loop (Tries up to 3 times silently if server is busy)
-        max_retries = 3
-        for attempt in range(max_retries):
-          for model_name in candidate_models:
-            try:
-              response = client.models.generate_content(
-                  model=model_name, contents=[prompt, image_part]
-              )
-              if response and hasattr(response, "text") and response.text:
-                break
-            except Exception as model_err:
-              error_message = str(model_err)
-              continue
+        # Streamlined execution loop with fast model fallback
+        for model_name in candidate_models:
+          try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=[prompt, image_part],
+                config=types.GenerateContentConfig(
+                    http_options={"timeout": 15000}
+                ),  # 15 second timeout to prevent hanging
+            )
+            if response and hasattr(response, "text") and response.text:
+              break
+          except Exception as model_err:
+            error_message = str(model_err)
+            continue
 
           if response and hasattr(response, "text") and response.text:
-            break  # Success! Exit retry loop
-
-          # If it failed all models on this attempt, wait 2 seconds and retry
-          if attempt < max_retries - 1:
-            time.sleep(2)
+            break
 
       except Exception as e:
         error_message = str(e)
@@ -399,6 +397,6 @@ if uploaded_file is not None:
         )
       else:
         st.error(
-            "⚠️ Unable to generate analysis right now. Please check your image"
-            f" format or connection. (Details: {error_message})"
+            "⚠️ The server took too long to respond or is busy. Please try"
+            f" clicking 'Reveal the Truth' again. (Details: {error_message})"
         )
