@@ -252,7 +252,8 @@ if uploaded_file is not None:
       response = None
       error_message = None
 
-      target_model = "gemini-2.5-flash"
+      # Updated to the current standard model as requested by the server error
+      target_model = "gemini-3.8-flash"
 
       api_key = st.secrets.get("GEMINI_API_KEY", None)
       client = genai.Client(api_key=api_key) if api_key else genai.Client()
