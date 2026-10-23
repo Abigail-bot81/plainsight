@@ -243,8 +243,6 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  st.subheader("Analysis & Guidance")
-
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning(
@@ -316,6 +314,8 @@ if uploaded_file is not None:
             "text": analysis_text,
         })
 
+        # Display subheader right before rendering findings
+        st.subheader("Analysis & Guidance")
         st.markdown(f"### Findings ({category})")
 
         chunks = analysis_text.split("###")
