@@ -152,24 +152,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
-# Helper function for aggressive and instant image compression
-def optimize_uploaded_image(uploaded_file):
-  img = Image.open(uploaded_file)
-  if img.mode in ("RGBA", "P"):
-    img = img.convert("RGB")
-  max_size = (300, 300)
-  img.thumbnail(max_size, Image.Resampling.LANCZOS)
-  buffered = BytesIO()
-  img.save(buffered, format="JPEG", quality=50)
-  return buffered.getvalue()
-
-
-# Initialize Session State
+# Initialize Session State for History Log
 if "history" not in st.session_state:
   st.session_state.history = []
-if "run_analysis" not in st.session_state:
-  st.session_state.run_analysis = False
 
 # Sidebar for Outfit History Log & Session Export
 with st.sidebar:
@@ -258,154 +243,148 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
+  st.subheader("Analysis & Guidance")
+
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
       st.warning("Please upload an outfit image first.")
     else:
-      st.session_state.run_analysis = True
+      loading_placeholder = st.empty()
+      messages = [
+          ("Looking and analysing...", "👔"),
+          ("Checking the vibe...", "✨"),
+          ("Putting it all together...", "🔍"),
+      ]
+      for msg, icon in messages:
+        loading_placeholder.markdown(
+            f"""
+                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
+                    {msg} {icon}
+                </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        time.sleep(0.8)
+      loading_placeholder.empty()
 
-  if st.session_state.run_analysis:
-    st.markdown(f"### Findings ({category})")
-    live_placeholder = st.empty()
+      response = None
+      error_message = None
 
-    # Initialize Gemini Client securely using Streamlit Secrets
-    api_key = st.secrets.get("GEMINI_API_KEY", None)
-    client = genai.Client(api_key=api_key) if api_key else genai.Client()
+      # Updated with reliable current flash models
+      candidate_models = ["gemini-2.5-flash", "gemini-flash-latest"]
 
-    prompt = f"""
-        Analyze this outfit for '{category}'. Provide feedback using exactly these headers:
-        ### Strengths
-        ### Assessment
-        ### Refinements
-        Keep it concise, punchy, and professional.
-        """
+      api_key = st.secrets.get("GEMINI_API_KEY", None)
+      client = genai.Client(api_key=api_key) if api_key else genai.Client()
 
-    optimized_image_bytes = optimize_uploaded_image(uploaded_file)
-    image_part = types.Part.from_bytes(
-        data=optimized_image_bytes, mime_type="image/jpeg"
-    )
+      prompt = f"""
+            Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
+            ### Strengths
+            ### Assessment
+            ### Refinements
+            Keep the content fully detailed, insightful, and professional.
+            """
+      image_part = types.Part.from_bytes(
+          data=uploaded_file.getvalue(), mime_type=uploaded_file.type
+      )
 
-    analysis_text = ""
-    error_message = ""
-
-    candidate_models = ["gemini-2.5-flash", "gemini-flash-latest"]
-    max_retries = 3
-
-    for model_name in candidate_models:
-      success = False
-      for attempt in range(max_retries):
+      for model_name in candidate_models:
         try:
-          config = types.GenerateContentConfig(
-              max_output_tokens=300, temperature=0.3
+          response = client.models.generate_content(
+              model=model_name, contents=[prompt, image_part]
           )
-          response_stream = client.models.generate_content_stream(
-              model=model_name, contents=[prompt, image_part], config=config
-          )
-          temp_text = ""
-          for chunk in response_stream:
-            if hasattr(chunk, "text") and chunk.text:
-              temp_text += chunk.text
-              live_placeholder.markdown(temp_text)
-
-          if temp_text:
-            analysis_text = temp_text
-            success = True
+          if response and hasattr(response, "text") and response.text:
             break
         except Exception as e:
           error_message = str(e)
-          wait_time = (attempt + 1) * 1.5
-          time.sleep(wait_time)
+          time.sleep(1)
           continue
 
-      if success:
-        break
+      if response and hasattr(response, "text") and response.text:
+        analysis_text = response.text
 
-    if analysis_text:
-      current_time = time.strftime("%H:%M:%S")
-      st.session_state.history.append({
-          "category": category,
-          "time": current_time,
-          "image": uploaded_file.getvalue(),
-          "text": analysis_text,
-      })
+        current_time = time.strftime("%H:%M:%S")
+        st.session_state.history.append({
+            "category": category,
+            "time": current_time,
+            "image": uploaded_file.getvalue(),
+            "text": analysis_text,
+        })
 
-      live_placeholder.empty()
-      chunks = analysis_text.split("###")
-      for chunk in chunks:
-        if chunk.strip():
-          lines = chunk.strip().split("\n", 1)
-          title = lines[0].strip().replace("#", "").strip()
-          body = lines[1].strip() if len(lines) > 1 else ""
+        st.markdown(f"### Findings ({category})")
 
-          if title == "Strengths":
-            with st.expander(
-                f"✨ {title} (Click to expand/collapse)", expanded=True
-            ):
-              st.markdown(
-                  f"""
-                                <div class="card-strengths">
-                                    <div class="header-strengths">{title}</div>
-                                </div>
-                            """,
-                  unsafe_allow_html=True,
-              )
-              st.markdown(body)
-          elif title == "Assessment":
-            with st.expander(
-                f"⭐ {title} (Click to expand/collapse)", expanded=True
-            ):
-              st.markdown(
-                  f"""
-                                <div class="card-assessment">
-                                    <div class="header-assessment">{title}</div>
-                                </div>
-                            """,
-                  unsafe_allow_html=True,
-              )
-              st.markdown(body)
-          elif title == "Refinements":
-            with st.expander(
-                f"🎯 {title} (Click to expand/collapse)", expanded=True
-            ):
-              st.markdown(
-                  f"""
-                                <div class="card-refinements">
-                                    <div class="header-refinements">{title}</div>
-                                </div>
-                            """,
-                  unsafe_allow_html=True,
-              )
-              st.markdown(body)
+        chunks = analysis_text.split("###")
+        for chunk in chunks:
+          if chunk.strip():
+            lines = chunk.strip().split("\n", 1)
+            title = lines[0].strip().replace("#", "").strip()
+            body = lines[1].strip() if len(lines) > 1 else ""
 
-      st.markdown(
-          """
-            <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-                <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    Analysis complete.
+            if title == "Strengths":
+              with st.expander(
+                  f"✨ {title} (Click to expand/collapse)", expanded=True
+              ):
+                st.markdown(
+                    f"""
+                                    <div class="card-strengths">
+                                        <div class="header-strengths">{title}</div>
+                                    </div>
+                                """,
+                    unsafe_allow_html=True,
+                )
+                st.markdown(body)
+            elif title == "Assessment":
+              with st.expander(
+                  f"⭐ {title} (Click to expand/collapse)", expanded=True
+              ):
+                st.markdown(
+                    f"""
+                                    <div class="card-assessment">
+                                        <div class="header-assessment">{title}</div>
+                                    </div>
+                                """,
+                    unsafe_allow_html=True,
+                )
+                st.markdown(body)
+            elif title == "Refinements":
+              with st.expander(
+                  f"🎯 {title} (Click to expand/collapse)", expanded=True
+              ):
+                st.markdown(
+                    f"""
+                                    <div class="card-refinements">
+                                        <div class="header-refinements">{title}</div>
+                                    </div>
+                                """,
+                    unsafe_allow_html=True,
+                )
+                st.markdown(body)
+
+        st.markdown(
+            """
+                <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+                    <div style="background-color: rgba(226, 232, 240, 0.9); color: #1E293B; font-weight: 600; padding: 10px 24px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        Analysis complete.
+                    </div>
                 </div>
-            </div>
-        """,
-          unsafe_allow_html=True,
-      )
+            """,
+            unsafe_allow_html=True,
+        )
 
-      report_markdown = (
-          f"# PlainSight Styling Report\n\n**Category:**"
-          f" {category}\n\n{analysis_text}"
-      )
-      st.download_button(
-          label="📥 Download Styling Report",
-          data=report_markdown,
-          file_name=(
-              "plainsight_report_"
-              f"{category.lower().replace('/', '_').strip()}.md"
-          ),
-          mime="text/markdown",
-      )
-
-      st.session_state.run_analysis = False
-    else:
-      if error_message:
+        report_markdown = (
+            f"# PlainSight Styling Report\n\n**Category:**"
+            f" {category}\n\n{analysis_text}"
+        )
+        st.download_button(
+            label="📥 Download Styling Report",
+            data=report_markdown,
+            file_name=(
+                "plainsight_report_"
+                f"{category.lower().replace('/', '_').strip()}.md"
+            ),
+            mime="text/markdown",
+        )
+      else:
         st.error(
-            "Unable to connect to the model endpoint due to high traffic or"
-            f" quota limits. (Details: {error_message})"
+            "Unable to connect to the model endpoint. (Details:"
+            f" {error_message})"
         )
