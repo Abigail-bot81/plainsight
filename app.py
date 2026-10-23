@@ -249,28 +249,10 @@ if uploaded_file is not None:
           "⚠️ Please upload an outfit image before clicking Reveal the Truth."
       )
     else:
-      loading_placeholder = st.empty()
-      messages = [
-          ("Looking and analysing...", "👔"),
-          ("Checking the vibe...", "✨"),
-          ("Putting it all together...", "🔍"),
-      ]
-      for msg, icon in messages:
-        loading_placeholder.markdown(
-            f"""
-                <div style="padding: 15px; text-align: center; font-size: 1.1rem; font-weight: 600; color: #2563EB; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 15px;">
-                    {msg} {icon}
-                </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        time.sleep(0.4)
-      loading_placeholder.empty()
-
       response = None
       error_message = None
 
-      candidate_models = ["gemini-2.5-flash", "gemini-flash-latest"]
+      target_model = "gemini-2.5-flash"
 
       api_key = st.secrets.get("GEMINI_API_KEY", None)
       client = genai.Client(api_key=api_key) if api_key else genai.Client()
@@ -283,7 +265,7 @@ if uploaded_file is not None:
             Keep the content fully detailed, insightful, and professional.
             """
 
-     try:
+      try:
         # Open image with PIL, resize it to max 800px wide for lightning-fast processing
         img = Image.open(uploaded_file)
         img.thumbnail((800, 800))
@@ -297,24 +279,10 @@ if uploaded_file is not None:
             data=compressed_image_bytes, mime_type=uploaded_file.type
         )
 
-        # Streamlined execution loop with fast model fallback
-        for model_name in candidate_models:
-          try:
-            response = client.models.generate_content(
-                model=model_name,
-                contents=[prompt, image_part],
-                config=types.GenerateContentConfig(
-                    http_options={"timeout": 15000}
-                ),  # 15 second timeout to prevent hanging
-            )
-            if response and hasattr(response, "text") and response.text:
-              break
-          except Exception as model_err:
-            error_message = str(model_err)
-            continue
-
-          if response and hasattr(response, "text") and response.text:
-            break
+        with st.spinner("Analyzing outfit..."):
+          response = client.models.generate_content(
+              model=target_model, contents=[prompt, image_part]
+          )
 
       except Exception as e:
         error_message = str(e)
@@ -406,6 +374,6 @@ if uploaded_file is not None:
         )
       else:
         st.error(
-            "⚠️ The server took too long to respond or is busy. Please try"
-            f" clicking 'Reveal the Truth' again. (Details: {error_message})"
+            "⚠️ Unable to generate analysis right now. Please check your image"
+            f" format or connection. (Details: {error_message})"
         )
