@@ -247,7 +247,9 @@ if uploaded_file is not None:
 
   if st.button("Reveal the Truth"):
     if uploaded_file is None:
-      st.warning("Please upload an outfit image first.")
+      st.warning(
+          "⚠️ Please upload an outfit image before clicking Reveal the Truth."
+      )
     else:
       loading_placeholder = st.empty()
       messages = [
@@ -264,13 +266,12 @@ if uploaded_file is not None:
             """,
             unsafe_allow_html=True,
         )
-        time.sleep(0.8)
+        time.sleep(0.6)
       loading_placeholder.empty()
 
       response = None
       error_message = None
 
-      # Updated with reliable current flash models
       candidate_models = ["gemini-2.5-flash", "gemini-flash-latest"]
 
       api_key = st.secrets.get("GEMINI_API_KEY", None)
@@ -283,21 +284,26 @@ if uploaded_file is not None:
             ### Refinements
             Keep the content fully detailed, insightful, and professional.
             """
-      image_part = types.Part.from_bytes(
-          data=uploaded_file.getvalue(), mime_type=uploaded_file.type
-      )
 
-      for model_name in candidate_models:
-        try:
-          response = client.models.generate_content(
-              model=model_name, contents=[prompt, image_part]
-          )
-          if response and hasattr(response, "text") and response.text:
-            break
-        except Exception as e:
-          error_message = str(e)
-          time.sleep(1)
-          continue
+      try:
+        image_part = types.Part.from_bytes(
+            data=uploaded_file.getvalue(), mime_type=uploaded_file.type
+        )
+
+        for model_name in candidate_models:
+          try:
+            response = client.models.generate_content(
+                model=model_name, contents=[prompt, image_part]
+            )
+            if response and hasattr(response, "text") and response.text:
+              break
+          except Exception as model_err:
+            error_message = str(model_err)
+            time.sleep(0.5)
+            continue
+
+      except Exception as e:
+        error_message = str(e)
 
       if response and hasattr(response, "text") and response.text:
         analysis_text = response.text
@@ -385,6 +391,6 @@ if uploaded_file is not None:
         )
       else:
         st.error(
-            "Unable to connect to the model endpoint. (Details:"
-            f" {error_message})"
+            "⚠️ Unable to generate analysis right now. Please check your image"
+            f" format or connection. (Details: {error_message})"
         )
