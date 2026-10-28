@@ -251,8 +251,6 @@ if uploaded_file is not None:
     else:
       response = None
       error_message = None
-
-      # Fixed to the explicitly requested current model endpoint
       target_model = "gemini-3.8-flash"
 
       api_key = st.secrets.get("GEMINI_API_KEY", None)
@@ -280,10 +278,22 @@ if uploaded_file is not None:
             data=compressed_image_bytes, mime_type=uploaded_file.type
         )
 
-        with st.spinner("Analyzing outfit..."):
-          response = client.models.generate_content(
-              model=target_model, contents=[prompt, image_part]
-          )
+        with st.spinner(
+            "Analyzing outfit (retrying if high demand)..."
+        ):
+          # Auto-retry loop to handle temporary 503 traffic spikes smoothly
+          max_retries = 3
+          for attempt in range(max_retries):
+            try:
+              response = client.models.generate_content(
+                  model=target_model, contents=[prompt, image_part]
+              )
+              if response and hasattr(response, "text") and response.text:
+                break
+            except Exception as retry_err:
+              if attempt == max_retries - 1:
+                raise retry_err
+              time.sleep(2)  # Wait 2 seconds before next retry attempt
 
       except Exception as e:
         error_message = str(e)
@@ -375,6 +385,7 @@ if uploaded_file is not None:
         )
       else:
         st.error(
-            "⚠️ Unable to generate analysis right now. Please check your image"
-            f" format or connection. (Details: {error_message})"
+            "⚠️ Unable to generate analysis right now due to high server"
+            " demand. Please try clicking **Analyze Outfit** again in a few"
+            f" moments. (Details: {error_message})"
         )
