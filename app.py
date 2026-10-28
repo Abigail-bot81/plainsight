@@ -243,10 +243,10 @@ if uploaded_file is not None:
   st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
   st.markdown("---")
 
-  if st.button("Unlock Style Insights"):
+  if st.button("Analyze Outfit"):
     if uploaded_file is None:
       st.warning(
-          "⚠️ Please upload an outfit image before clicking Unlock Style Insights."
+          "⚠️ Please upload an outfit image before clicking Analyze Outfit."
       )
     else:
       response = None
