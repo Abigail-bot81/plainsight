@@ -340,9 +340,3 @@ else:
 st.error("Could not obtain text back from the analysis engine.")
 except Exception as e:
 st.error(f"An unexpected error occurred during execution: {e}")
-
----
-
-### Key Improvements Implemented:
-* **Completed the Call Sequence:** Added `client.models.generate_content` using the correct syntax for the new `google-genai` SDK.
-* **Smart UI Card Breakdowns:** Instead of dumping raw markdown text into your beautifully styled UI, the code now automatically splits up the model's text response and routes it perfectly inside your custom `.card-strengths`, `.card-assessment`, and `.card-refinements` CSS blocks.
