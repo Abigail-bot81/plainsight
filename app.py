@@ -231,9 +231,7 @@ if uploaded_file is not None:
     st.markdown("---")
 
     if st.button("Analyze Outfit"):
-        # Set a placeholder so we can show dynamic status update text
         status_box = st.empty()
-        
         target_model = "gemini-3.8-flash"
 
         api_key = st.secrets.get("GEMINI_API_KEY", None)
@@ -266,7 +264,6 @@ if uploaded_file is not None:
                 response = None
                 max_retries = 3
                 
-                # Dynamic retry loop to safely absorb Google server overload spikes
                 for attempt in range(max_retries):
                     try:
                         status_box.info(f"⏳ Analyzing style details... (Attempt {attempt + 1}/{max_retries})")
@@ -274,15 +271,14 @@ if uploaded_file is not None:
                             model=target_model,
                             contents=[image_part, prompt]
                         )
-                        break  # If successful, exit the retry loop immediately!
+                        break
                     except Exception as server_error:
-                        # If it's a high demand error and we have attempts left, wait and try again
                         if "503" in str(server_error) and attempt < max_retries - 1:
                             time.sleep(2.5)
                         else:
-                            raise server_error  # Pass error to the outer block if retries fail
+                            raise server_error
 
-                status_box.empty() # Clear out loading tracker info boxes
+                status_box.empty()
 
                 if response and response.text:
                     raw_text = response.text
@@ -300,3 +296,14 @@ if uploaded_file is not None:
                     timestamp = time.strftime("%H:%M")
                     st.session_state.history.append({
                         "category": category,
+                        "time": timestamp,
+                        "image": uploaded_file,
+                        "text": raw_text
+                    })
+                    st.rerun()
+                else:
+                    st.error("Could not obtain text back from the analysis engine.")
+
+            except Exception as e:
+                status_box.empty()
+                if "503" in str(e):
