@@ -175,8 +175,8 @@ if uploaded_file is not None:
                     img.save(img_byte_arr, format="JPEG")
                     base64_image = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
 
-                    # Fast, free vision model route via OpenRouter
-                    model_name = "google/gemini-flash-1.5-8b:free"
+                    # Use auto-router free path to automatically clear traffic jams
+                    model_name = "openrouter/auto:free"
                     
                     headers = {
                         "Authorization": f"Bearer {api_key}",
@@ -199,28 +199,34 @@ if uploaded_file is not None:
                     response = requests.post("https://openrouter.ai", headers=headers, json=payload, timeout=45)
                     
                     if response.status_code == 200:
-                        result_json = response.json()
-                        raw_text = result_json["choices"]["message"]["content"]
-                        
-                        st.subheader("Analysis Results")
-                        st.markdown(
-                            f'<div class="card-assessment">'
-                            f'<div class="header-assessment">🔍 Style Breakdown</div>'
-                            f'{raw_text}'
-                            f'</div>', 
-                            unsafe_allow_html=True
-                        )
+                        try:
+                            result_json = response.json()
+                            raw_text = result_json["choices"]["message"]["content"]
+                            
+                            st.subheader("Analysis Results")
+                            st.markdown(
+                                f'<div class="card-assessment">'
+                                f'<div class="header-assessment">🔍 Style Breakdown</div>'
+                                f'{raw_text}'
+                                f'</div>', 
+                                unsafe_allow_html=True
+                            )
 
-                        timestamp = time.strftime("%H:%M")
-                        st.session_state.history.append({
-                            "category": category,
-                            "time": timestamp,
-                            "image": uploaded_file,
-                            "text": raw_text
-                        })
-                        st.rerun()
+                            timestamp = time.strftime("%H:%M")
+                            st.session_state.history.append({
+                                "category": category,
+                                "time": timestamp,
+                                "image": uploaded_file,
+                                "text": raw_text
+                            })
+                            st.rerun()
+                        except Exception:
+                            st.warning("⚠️ The free server returned an unreadable response due to high volume. Please click 'Analyze Outfit' once more to try an alternate lane.")
                     else:
-                        st.error(f"API Error (Status {response.status_code}): {response.text}")
+                        st.error(f"API Error (Status {response.status_code}): Please try clicking the analyze button again.")
 
                 except Exception as e:
-                    st.error(f"Execution Error: {e}")
+                    if "Expecting value" in str(e):
+                        st.warning("⏳ Free servers are congested. Retrying your request... Please click 'Analyze Outfit' again.")
+                    else:
+                        st.error(f"Execution Error: {e}")
