@@ -192,7 +192,6 @@ with st.sidebar:
                 st.markdown(item["text"])
                 
     st.markdown("---")
-    # Added "About" section matching your design aesthetic
     st.header("ℹ️ About PlainSight")
     st.markdown(
         """
@@ -267,7 +266,6 @@ if uploaded_file is not None:
 
     if st.button("Analyze Outfit"):
         with st.spinner("Analyzing your style... Please hold."):
-            # Note: "gemini-2.5-flash" is Google's core, highly efficient multimodal model for production
             target_model = "gemini-2.5-flash"
 
             api_key = st.secrets.get("GEMINI_API_KEY", None)
@@ -285,14 +283,11 @@ if uploaded_file is not None:
                 """
 
                 try:
-                    # Open image with PIL, resize it to max 800px wide for lightning-fast processing
                     img = Image.open(uploaded_file)
                     img.thumbnail((800, 800))
 
-                    # Save compressed image into bytes buffer
                     img_byte_arr = BytesIO()
                     
-                    # Convert to RGB if image is RGBA (PNG with transparency) to avoid JPEG saving issues
                     if img.mode in ("RGBA", "P"):
                         img = img.convert("RGB")
                         
@@ -303,39 +298,16 @@ if uploaded_file is not None:
                         data=compressed_image_bytes, mime_type="image/jpeg"
                     )
 
-                    # Execute the model call to process the image and text prompt
                     response = client.models.generate_content(
                         model=target_model,
-contents=[image_part, prompt]
-)
-if response and response.text:
-raw_text = response.text
-# Parse out individual sections to map them nicely to your custom CSS classes
-sections = {"### Strengths": "", "### Assessment": "", "### Refinements": ""}
-current_key = None
-for line in raw_text.split("\n"):
-if line.strip() in sections:
-current_key = line.strip()
-elif current_key:
-sections[current_key] += line + "\n"
-# Display styled output cards matching your color design parameters
-st.subheader("Analysis Results")
-if sections["### Strengths"].strip():
-st.markdown(f'✨ Strengths{sections["### Strengths"]}', unsafe_allow_html=True)
-if sections["### Assessment"].strip():
-st.markdown(f'🔍 Assessment{sections["### Assessment"]}', unsafe_allow_html=True)
-if sections["### Refinements"].strip():
-st.markdown(f'💡 Refinements{sections["### Refinements"]}', unsafe_allow_html=True)
-# Save to session history log
-timestamp = time.strftime("%H:%M")
-st.session_state.history.append({
-"category": category,
-"time": timestamp,
-"image": uploaded_file,
-"text": raw_text
-})
-st.rerun()
-else:
-st.error("Could not obtain text back from the analysis engine.")
-except Exception as e:
-st.error(f"An unexpected error occurred during execution: {e}")
+                        contents=[image_part, prompt]
+                    )
+
+                    if response and response.text:
+                        raw_text = response.text
+                        
+                        sections = {"### Strengths": "", "### Assessment": "", "### Refinements": ""}
+                        current_key = None
+                        
+                        for line in raw_text.split("\n"):
+                            if line.strip() in sections:
