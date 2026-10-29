@@ -232,7 +232,7 @@ if uploaded_file is not None:
 
     if st.button("Analyze Outfit"):
         with st.spinner("Analyzing your style... Please hold."):
-            target_model = "gemini-2.5-flash"
+            target_model = "gemini-3.8-flash"
 
             api_key = st.secrets.get("GEMINI_API_KEY", None)
             if not api_key:
