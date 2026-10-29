@@ -306,7 +306,6 @@ if uploaded_file is not None:
                     # Execute the model call to process the image and text prompt
                     response = client.models.generate_content(
                         model=target_model,
-Use code with caution.
 contents=[image_part, prompt]
 )
 if response and response.text:
