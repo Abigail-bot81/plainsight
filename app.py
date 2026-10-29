@@ -1,8 +1,8 @@
+import base64
 from io import BytesIO
 from PIL import Image
 import time
-from google import genai
-from google.genai import types
+import requests
 import streamlit as st
 
 # Page Configuration
@@ -25,14 +25,9 @@ st.markdown(
     [data-testid="stSidebar"] {
         background-color: #0F172A;
     }
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3, 
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] span, 
-    [data-testid="stSidebar"] label, 
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] .stMarkdown {
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label, 
+    [data-testid="stSidebar"] div, [data-testid="stSidebar"] .stMarkdown {
         color: #F8FAFC !important;
     }
 
@@ -42,10 +37,8 @@ st.markdown(
     }
 
     /* Force file uploader text and instructions to be dark and high-contrast */
-    [data-testid="stFileUploader"] *, 
-    [data-testid="stFileUploader"] span, 
-    [data-testid="stFileUploader"] small, 
-    [data-testid="stFileUploader"] div, 
+    [data-testid="stFileUploader"] *, [data-testid="stFileUploader"] span, 
+    [data-testid="stFileUploader"] small, [data-testid="stFileUploader"] div, 
     [data-testid="stFileUploader"] label {
         color: #0F172A !important;
         font-weight: 600 !important;
@@ -63,44 +56,6 @@ st.markdown(
     .stButton>button:hover {
         background-color: #1D4ED8;
         color: white;
-    }
-
-    /* Custom Category Box Themes */
-    .cat-casual {
-        background-color: rgba(238, 242, 255, 0.9);
-        color: #4F46E5 !important;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        border: 1px solid #C7D2FE;
-    }
-    .cat-business {
-        background-color: rgba(224, 242, 254, 0.9);
-        color: #1E3A8A !important;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        border: 1px solid #BFDBFE;
-    }
-    .cat-evening {
-        background-color: rgba(254, 243, 199, 0.9);
-        color: #581C87 !important;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        border: 1px solid #FDE68A;
-    }
-    .cat-athleisure {
-        background-color: rgba(255, 237, 213, 0.9);
-        color: #14532D !important;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        border: 1px solid #FED7AA;
     }
 
     /* Assessment Card Theme (Gold) */
@@ -172,7 +127,7 @@ with st.sidebar:
         """
     )
 
-# Display Logo (Gracefully handles case where file is missing locally)
+# Display Logo
 try:
     st.image("PlainSight logo.png", width=200)
 except Exception:
@@ -189,42 +144,14 @@ st.subheader("Target Image")
 
 category = st.selectbox(
     "Select Outfit Category",
-    [
-        "Casual / Everyday",
-        "Business / Formal",
-        "Evening / Special Occasion",
-        "Athleisure",
-    ],
+    ["Casual / Everyday", "Business / Formal", "Evening / Special Occasion", "Athleisure"],
 )
-
-if category == "Casual / Everyday":
-    st.markdown(
-        '<div class="cat-casual">✨ Active Category: Casual / Everyday</div>',
-        unsafe_allow_html=True,
-    )
-elif category == "Business / Formal":
-    st.markdown(
-        '<div class="cat-business">💼 Active Category: Business / Formal</div>',
-        unsafe_allow_html=True,
-    )
-elif category == "Evening / Special Occasion":
-    st.markdown(
-        '<div class="cat-evening">🌙 Active Category: Evening / Special Occasion</div>',
-        unsafe_allow_html=True,
-    )
-else:
-    st.markdown(
-        '<div class="cat-athleisure">⚡ Active Category: Athleisure</div>',
-        unsafe_allow_html=True,
-    )
 
 st.markdown(
     '<p style="color: #F8FAFC; font-weight: 600; margin-bottom: 0.5rem;">Choose an outfit image</p>',
     unsafe_allow_html=True,
 )
-uploaded_file = st.file_uploader(
-    "", type=["jpg", "jpeg", "png"], label_visibility="collapsed"
-)
+uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Selected Outfit", use_container_width=True)
@@ -232,45 +159,50 @@ if uploaded_file is not None:
 
     if st.button("Analyze Outfit"):
         with st.spinner("Analyzing your style details... Please hold."):
-            target_model = "gemini-3.8-flash"
-
-            api_key = st.secrets.get("GEMINI_API_KEY", None)
+            api_key = st.secrets.get("OPENROUTER_API_KEY", None)
+            
             if not api_key:
-                st.error("⚠️ GEMINI_API_KEY not found in Streamlit Secrets. Please check your dashboard setup.")
+                st.error("⚠️ OPENROUTER_API_KEY not found in Streamlit Secrets.")
             else:
-                client = genai.Client(api_key=api_key)
-
-                prompt = f"""
-                Analyze this outfit photo for the category '{category}'. 
-                Provide detailed feedback on what works well and what could be improved.
-                """
-
                 try:
+                    # Compress image to save bandwidth
                     img = Image.open(uploaded_file)
                     img.thumbnail((800, 800))
-
-                    img_byte_arr = BytesIO()
-                    
                     if img.mode in ("RGBA", "P"):
                         img = img.convert("RGB")
-                        
+                    
+                    img_byte_arr = BytesIO()
                     img.save(img_byte_arr, format="JPEG")
-                    compressed_image_bytes = img_byte_arr.getvalue()
+                    base64_image = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
 
-                    image_part = types.Part.from_bytes(
-                        data=compressed_image_bytes, mime_type="image/jpeg"
-                    )
+                    # Fast, free alternative vision model via OpenRouter
+                    model_name = "meta-llama/llama-3.2-11b-vision-instruct:free"
+                    
+                    headers = {
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json"
+                    }
+                    
+                    payload = {
+                        "model": model_name,
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": f"Analyze this outfit photo for the category '{category}'. Provide detailed feedback on what works well and what could be improved. Break your answer down with clean, bulleted summaries."},
+                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                                ]
+                            }
+                        ]
+                    }
 
-                    response = client.models.generate_content(
-                        model=target_model,
-                        contents=[image_part, prompt]
-                    )
-
-                    if response and response.text:
-                        raw_text = response.text
+                    response = requests.post("https://openrouter.ai", headers=headers, json=payload, timeout=45)
+                    
+                    if response.status_code == 200:
+                        result_json = response.json()
+                        raw_text = result_json["choices"]["message"]["content"]
                         
                         st.subheader("Analysis Results")
-                        
                         st.markdown(
                             f'<div class="card-assessment">'
                             f'<div class="header-assessment">🔍 Style Breakdown</div>'
@@ -288,7 +220,7 @@ if uploaded_file is not None:
                         })
                         st.rerun()
                     else:
-                        st.error("Could not obtain text back from the analysis engine.")
+                        st.error(f"API Error (Status {response.status_code}): {response.text}")
 
                 except Exception as e:
                     st.error(f"Execution Error: {e}")
