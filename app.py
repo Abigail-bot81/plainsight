@@ -231,79 +231,64 @@ if uploaded_file is not None:
     st.markdown("---")
 
     if st.button("Analyze Outfit"):
-        status_box = st.empty()
-        target_model = "gemini-3.8-flash"
+        with st.spinner("Analyzing your style details... Please hold."):
+            target_model = "gemini-3.8-flash"
 
-        api_key = st.secrets.get("GEMINI_API_KEY", None)
-        if not api_key:
-            st.error("⚠️ GEMINI_API_KEY not found in Streamlit Secrets. Please check your dashboard setup.")
-        else:
-            client = genai.Client(api_key=api_key)
+            api_key = st.secrets.get("GEMINI_API_KEY", None)
+            if not api_key:
+                st.error("⚠️ GEMINI_API_KEY not found in Streamlit Secrets. Please check your dashboard setup.")
+            else:
+                client = genai.Client(api_key=api_key)
 
-            prompt = f"""
-            Analyze this outfit photo for the category '{category}'. 
-            Provide detailed feedback on what works well and what could be improved.
-            """
+                prompt = f"""
+                Analyze this outfit photo for the category '{category}'. 
+                Provide detailed feedback on what works well and what could be improved.
+                """
 
-            try:
-                img = Image.open(uploaded_file)
-                img.thumbnail((800, 800))
+                try:
+                    img = Image.open(uploaded_file)
+                    img.thumbnail((800, 800))
 
-                img_byte_arr = BytesIO()
-                
-                if img.mode in ("RGBA", "P"):
-                    img = img.convert("RGB")
+                    img_byte_arr = BytesIO()
                     
-                img.save(img_byte_arr, format="JPEG")
-                compressed_image_bytes = img_byte_arr.getvalue()
+                    if img.mode in ("RGBA", "P"):
+                        img = img.convert("RGB")
+                        
+                    img.save(img_byte_arr, format="JPEG")
+                    compressed_image_bytes = img_byte_arr.getvalue()
 
-                image_part = types.Part.from_bytes(
-                    data=compressed_image_bytes, mime_type="image/jpeg"
-                )
-
-                response = None
-                max_retries = 3
-                
-                for attempt in range(max_retries):
-                    try:
-                        status_box.info(f"⏳ Analyzing style details... (Attempt {attempt + 1}/{max_retries})")
-                        response = client.models.generate_content(
-                            model=target_model,
-                            contents=[image_part, prompt]
-                        )
-                        break
-                    except Exception as server_error:
-                        if "503" in str(server_error) and attempt < max_retries - 1:
-                            time.sleep(2.5)
-                        else:
-                            raise server_error
-
-                status_box.empty()
-
-                if response and response.text:
-                    raw_text = response.text
-                    
-                    st.subheader("Analysis Results")
-                    
-                    st.markdown(
-                        f'<div class="card-assessment">'
-                        f'<div class="header-assessment">🔍 Style Breakdown</div>'
-                        f'{raw_text}'
-                        f'</div>', 
-                        unsafe_allow_html=True
+                    image_part = types.Part.from_bytes(
+                        data=compressed_image_bytes, mime_type="image/jpeg"
                     )
 
-                    timestamp = time.strftime("%H:%M")
-                    st.session_state.history.append({
-                        "category": category,
-                        "time": timestamp,
-                        "image": uploaded_file,
-                        "text": raw_text
-                    })
-                    st.rerun()
-                else:
-                    st.error("Could not obtain text back from the analysis engine.")
+                    response = client.models.generate_content(
+                        model=target_model,
+                        contents=[image_part, prompt]
+                    )
 
-            except Exception as e:
-                status_box.empty()
-                if "503" in str(e):
+                    if response and response.text:
+                        raw_text = response.text
+                        
+                        st.subheader("Analysis Results")
+                        
+                        st.markdown(
+                            f'<div class="card-assessment">'
+                            f'<div class="header-assessment">🔍 Style Breakdown</div>'
+                            f'{raw_text}'
+                            f'</div>', 
+                            unsafe_allow_html=True
+                        )
+
+                        timestamp = time.strftime("%H:%M")
+                        st.session_state.history.append({
+                            "category": category,
+                            "time": timestamp,
+                            "image": uploaded_file,
+                            "text": raw_text
+                        })
+                        st.rerun()
+                    else:
+                        st.error("Could not obtain text back from the analysis engine.")
+
+                except Exception as e:
+                    st.error(f"Execution Error: {e}")
