@@ -103,23 +103,6 @@ st.markdown(
         border: 1px solid #FED7AA;
     }
 
-    /* Strengths Card Theme (Blue) */
-    .card-strengths {
-        background-color: #DBEAFE;
-        border: 1px solid #93C5FD;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        color: #1E40AF !important;
-    }
-    .header-strengths {
-        color: #1E40AF !important;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-top: 0px;
-    }
-
     /* Assessment Card Theme (Gold) */
     .card-assessment {
         background-color: #FEF08A;
@@ -132,23 +115,6 @@ st.markdown(
     }
     .header-assessment {
         color: #713F12 !important;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-top: 0px;
-    }
-
-    /* Refinements Card Theme (Green) */
-    .card-refinements {
-        background-color: #BBF7D0;
-        border: 1px solid #86EFAC;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        color: #14532D !important;
-    }
-    .header-refinements {
-        color: #14532D !important;
         font-weight: 700;
         font-size: 1.1rem;
         margin-top: 0px;
@@ -275,11 +241,8 @@ if uploaded_file is not None:
                 client = genai.Client(api_key=api_key)
 
                 prompt = f"""
-                Analyze this outfit photo for the category '{category}'. Return your analysis using these exact section headers:
-                ### Strengths
-                ### Assessment
-                ### Refinements
-                Keep the content fully detailed, insightful, and professional. Do not include markdown headers other than the requested sections.
+                Analyze this outfit photo for the category '{category}'. 
+                Provide detailed feedback on what works well and what could be improved.
                 """
 
                 try:
@@ -306,8 +269,26 @@ if uploaded_file is not None:
                     if response and response.text:
                         raw_text = response.text
                         
-                        sections = {"### Strengths": "", "### Assessment": "", "### Refinements": ""}
-                        current_key = None
+                        st.subheader("Analysis Results")
                         
-                        for line in raw_text.split("\n"):
-                            if line.strip() in sections:
+                        st.markdown(
+                            f'<div class="card-assessment">'
+                            f'<div class="header-assessment">🔍 Style Breakdown</div>'
+                            f'{raw_text}'
+                            f'</div>', 
+                            unsafe_allow_html=True
+                        )
+
+                        timestamp = time.strftime("%H:%M")
+                        st.session_state.history.append({
+                            "category": category,
+                            "time": timestamp,
+                            "image": uploaded_file,
+                            "text": raw_text
+                        })
+                        st.rerun()
+                    else:
+                        st.error("Could not obtain text back from the analysis engine.")
+
+                except Exception as e:
+                    st.error(f"An unexpected error occurred during execution: {e}")
