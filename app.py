@@ -176,7 +176,7 @@ if uploaded_file is not None:
                     base64_image = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
 
                     # Use auto-router free path to automatically clear traffic jams
-                    model_name = "openrouter/auto:free"
+                    model_name = "google/gemini-2.5-flash:free"
                     
                     headers = {
                         "Authorization": f"Bearer {api_key}",
