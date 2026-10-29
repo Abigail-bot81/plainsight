@@ -175,9 +175,8 @@ if uploaded_file is not None:
                     img.save(img_byte_arr, format="JPEG")
                     base64_image = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
 
-                    # Fast, free alternative vision model via OpenRouter
-                   model_name = "google/gemini-flash-1.5-8b:free"
-
+                    # Fast, free vision model route via OpenRouter
+                    model_name = "google/gemini-flash-1.5-8b:free"
                     
                     headers = {
                         "Authorization": f"Bearer {api_key}",
