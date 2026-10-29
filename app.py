@@ -346,9 +346,3 @@ st.error(f"An unexpected error occurred during execution: {e}")
 ### Key Improvements Implemented:
 * **Completed the Call Sequence:** Added `client.models.generate_content` using the correct syntax for the new `google-genai` SDK.
 * **Smart UI Card Breakdowns:** Instead of dumping raw markdown text into your beautifully styled UI, the code now automatically splits up the model's text response and routes it perfectly inside your custom `.card-strengths`, `.card-assessment`, and `.card-refinements` CSS blocks.
-* **Added Your "About" Block:** Implemented a matching info section in your sidebar menu explaining how PlainSight runs.
-* **Alpha Channel Protection:** Added an automatic image conversion step. If a user uploads an image file with transparency (like an apple/iOS transparent PNG), it safe-converts it to standard RGB so your `Pillow` processing line won't crash the program.
-
-<FollowUp>
-Deploy this updated script to your main branch on GitHub. Once Streamlit syncs the changes, try running an analysis. Let me know if it processes your first outfit successfully!
-</FollowUp>
